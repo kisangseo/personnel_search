@@ -1,62 +1,18 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Personnel Admin Portal</title>
-</head>
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Personnel Admin Portal</title></head>
 <body>
   <h1>Personnel Admin Portal</h1>
   <p>Upload a CSV file to ingest personnel into Azure SQL.</p>
   <p><strong>Database target:</strong> Azure SQL / SQL Server (required)</p>
-
-  {% if db_error %}
-    <p style="color: #b00020;"><strong>Database connection error:</strong> {{ db_error }}</p>
-    <p>Upload is unavailable until SQL connection is fixed.</p>
-  {% endif %}
-
-  <form method="post" enctype="multipart/form-data">
-    <label for="csv_file">Select CSV file:</label>
-    <input id="csv_file" name="csv_file" type="file" accept=".csv,text/csv" required />
-    <button type="submit">Upload CSV</button>
-  </form>
-
-  <p><strong>Accepted minimum fields:</strong> <code>Employee ID</code>, <code>Worker</code>, <code>Worker/Position Job Profile</code>.</p>
-
-  {% if import_result %}
-    <p><strong>{{ import_result }}</strong></p>
-  {% endif %}
-
+  {% if db_error %}<p style="color: #b00020;"><strong>Database connection error:</strong> {{ db_error }}</p><p>Upload is unavailable until SQL connection is fixed.</p>{% endif %}
+  <form method="post" enctype="multipart/form-data"><label for="csv_file">Select CSV file:</label><input id="csv_file" name="csv_file" type="file" accept=".csv,text/csv" required /><button type="submit">Upload CSV</button></form>
+  <p><strong>Accepted matching:</strong> employee_id first, then exact name match if employee_id is blank.</p>
+  {% if import_result %}<p><strong>{{ import_result }}</strong></p>{% endif %}
   <h2>Agency Members ({{ members|length }})</h2>
   <table border="1" cellpadding="6" cellspacing="0">
-    <thead>
-      <tr>
-        <th>Employee ID</th>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Rank / Job Profile</th>
-        <th>Division</th>
-        <th>Status</th>
-        <th>Badge #</th>
-        <th>Imported At</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for m in members %}
-        <tr>
-          <td>{{ m.employee_id }}</td>
-          <td>{{ m.name }}</td>
-          <td>{{ m.email }}</td>
-          <td>{{ m.rank }}</td>
-          <td>{{ m.division }}</td>
-          <td>{{ m.status }}</td>
-          <td>{{ m.badge_number }}</td>
-          <td>{{ m.imported_at }}</td>
-        </tr>
-      {% else %}
-        <tr><td colspan="8">No records loaded yet.</td></tr>
-      {% endfor %}
-    </tbody>
+    <thead><tr><th>Employee ID</th><th>Name</th><th>Email</th><th>Rank</th><th>Division</th><th>Status</th><th>Badge #</th><th>Sequence</th><th>Department Cell</th><th>Radio ID</th><th>Race</th><th>Sex</th><th>Imported At</th></tr></thead>
+    <tbody>{% for m in members %}<tr><td>{{ m.employee_id }}</td><td>{{ m.name }}</td><td>{{ m.email }}</td><td>{{ m.rank }}</td><td>{{ m.division }}</td><td>{{ m.status }}</td><td>{{ m.badge_number }}</td><td>{{ m.sequence_num }}</td><td>{{ m.department_cell }}</td><td>{{ m.radio_id }}</td><td>{{ m.race }}</td><td>{{ m.sex }}</td><td>{{ m.imported_at }}</td></tr>{% else %}<tr><td colspan="13">No records loaded yet.</td></tr>{% endfor %}</tbody>
   </table>
 </body>
 </html>

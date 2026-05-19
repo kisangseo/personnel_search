@@ -17,12 +17,17 @@ app = Flask(__name__)
 
 CSV_FIELD_ALIASES = {
     "employee_id": ["employee_id", "Employee ID", "employee id", "EmployeeId"],
-    "name": ["name", "Name", "Worker", "worker"],
+    "name": ["name", "Name", "Worker", "worker", "Member"],
     "rank": ["rank", "Rank", "Worker/Position Job Profile", "Job Profile"],
-    "division": ["division", "Division"],
+    "division": ["division", "Division", "Assigned Division"],
     "email": ["email", "Email"],
     "status": ["status", "Status"],
     "badge_number": ["badge_number", "Badge Number", "badge number"],
+    "sequence_num": ["Sequence", "sequence", "sequence_num"],
+    "department_cell": ["Department Cell", "department cell", "department_cell"],
+    "radio_id": ["Radio_ID", "Radio ID", "radio_id", "radio id"],
+    "race": ["Race", "race"],
+    "sex": ["Sex", "sex"],
 }
 
 
@@ -50,12 +55,18 @@ def initialize_database(db: Any) -> None:
         END;
         """
     )
-    cursor.execute(
-        "IF COL_LENGTH('dbo.agency_members','source_file') IS NULL ALTER TABLE dbo.agency_members ADD source_file NVARCHAR(260) NULL;"
-    )
-    cursor.execute(
-        "IF COL_LENGTH('dbo.agency_members','imported_at') IS NULL ALTER TABLE dbo.agency_members ADD imported_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME();"
-    )
+
+    alter_statements = [
+        "IF COL_LENGTH('dbo.agency_members','source_file') IS NULL ALTER TABLE dbo.agency_members ADD source_file NVARCHAR(260) NULL;",
+        "IF COL_LENGTH('dbo.agency_members','imported_at') IS NULL ALTER TABLE dbo.agency_members ADD imported_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME();",
+        "IF COL_LENGTH('dbo.agency_members','sequence_num') IS NULL ALTER TABLE dbo.agency_members ADD sequence_num NVARCHAR(50) NULL;",
+        "IF COL_LENGTH('dbo.agency_members','department_cell') IS NULL ALTER TABLE dbo.agency_members ADD department_cell NVARCHAR(100) NULL;",
+        "IF COL_LENGTH('dbo.agency_members','radio_id') IS NULL ALTER TABLE dbo.agency_members ADD radio_id NVARCHAR(50) NULL;",
+        "IF COL_LENGTH('dbo.agency_members','race') IS NULL ALTER TABLE dbo.agency_members ADD race NVARCHAR(50) NULL;",
+        "IF COL_LENGTH('dbo.agency_members','sex') IS NULL ALTER TABLE dbo.agency_members ADD sex NVARCHAR(20) NULL;",
+    ]
+    for stmt in alter_statements:
+        cursor.execute(stmt)
     db.commit()
 
 
@@ -67,36 +78,48 @@ def _get_field(row: dict[str, str], canonical_name: str) -> str:
     return ""
 
 
-def ingest_csv_stream(db: Any, csv_stream: io.TextIOBase, source_name: str) -> tuple[int, int]:
+def ingest_csv_stream(db: Any, csv_stream: io.TextIOBase, source_name: str) -> tuple[int, int, int]:
     inserted = 0
     updated = 0
+    skipped = 0
     reader = csv.DictReader(csv_stream)
     cursor = db.cursor()
 
     for row in reader:
-        employee_id = _get_field(row, "employee_id")
-        if not employee_id:
-            continue
-
         payload = {
-            "employee_id": employee_id,
+            "employee_id": _get_field(row, "employee_id"),
             "name": _get_field(row, "name"),
             "email": _get_field(row, "email"),
             "rank": _get_field(row, "rank"),
             "division": _get_field(row, "division"),
             "status": _get_field(row, "status"),
             "badge_number": _get_field(row, "badge_number"),
+            "sequence_num": _get_field(row, "sequence_num"),
+            "department_cell": _get_field(row, "department_cell"),
+            "radio_id": _get_field(row, "radio_id"),
+            "race": _get_field(row, "race"),
+            "sex": _get_field(row, "sex"),
             "source_file": source_name,
         }
 
-        cursor.execute("SELECT employee_id FROM dbo.agency_members WHERE employee_id = ?", employee_id)
-        existing = cursor.fetchone()
+        target_employee_id = payload["employee_id"]
+
+        if target_employee_id:
+            cursor.execute("SELECT employee_id FROM dbo.agency_members WHERE employee_id = ?", target_employee_id)
+            existing = cursor.fetchone()
+        elif payload["name"]:
+            cursor.execute("SELECT TOP 1 employee_id FROM dbo.agency_members WHERE name = ?", payload["name"])
+            existing = cursor.fetchone()
+            target_employee_id = existing[0] if existing else ""
+        else:
+            existing = None
 
         if existing:
             cursor.execute(
                 """
                 UPDATE dbo.agency_members
                 SET name = ?, email = ?, rank = ?, division = ?, status = ?, badge_number = ?,
+                    sequence_num = ?, department_cell = ?, radio_id = ?, race = ?, sex = ?,
                     source_file = ?, imported_at = SYSUTCDATETIME()
                 WHERE employee_id = ?
                 """,
@@ -106,16 +129,26 @@ def ingest_csv_stream(db: Any, csv_stream: io.TextIOBase, source_name: str) -> t
                 payload["division"],
                 payload["status"],
                 payload["badge_number"],
+                payload["sequence_num"],
+                payload["department_cell"],
+                payload["radio_id"],
+                payload["race"],
+                payload["sex"],
                 payload["source_file"],
-                payload["employee_id"],
+                target_employee_id,
             )
             updated += 1
         else:
+            if not payload["employee_id"]:
+                skipped += 1
+                continue
+
             cursor.execute(
                 """
                 INSERT INTO dbo.agency_members
-                (employee_id, name, email, rank, division, status, badge_number, source_file, imported_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, SYSUTCDATETIME())
+                (employee_id, name, email, rank, division, status, badge_number, sequence_num,
+                 department_cell, radio_id, race, sex, source_file, imported_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, SYSUTCDATETIME())
                 """,
                 payload["employee_id"],
                 payload["name"],
@@ -124,19 +157,25 @@ def ingest_csv_stream(db: Any, csv_stream: io.TextIOBase, source_name: str) -> t
                 payload["division"],
                 payload["status"],
                 payload["badge_number"],
+                payload["sequence_num"],
+                payload["department_cell"],
+                payload["radio_id"],
+                payload["race"],
+                payload["sex"],
                 payload["source_file"],
             )
             inserted += 1
 
     db.commit()
-    return inserted, updated
+    return inserted, updated, skipped
 
 
 def fetch_members(db: Any):
     cursor = db.cursor()
     cursor.execute(
         """
-        SELECT employee_id, name, email, rank, division, status, badge_number, imported_at
+        SELECT employee_id, name, email, rank, division, status, badge_number,
+               sequence_num, department_cell, radio_id, race, sex, imported_at
         FROM dbo.agency_members
         ORDER BY name, employee_id
         """
@@ -151,7 +190,12 @@ def fetch_members(db: Any):
             "division": r[4],
             "status": r[5],
             "badge_number": r[6],
-            "imported_at": r[7],
+            "sequence_num": r[7],
+            "department_cell": r[8],
+            "radio_id": r[9],
+            "race": r[10],
+            "sex": r[11],
+            "imported_at": r[12],
         }
         for r in rows
     ]
@@ -173,8 +217,11 @@ def index():
                 import_result = "Please choose a CSV file before clicking Upload CSV."
             else:
                 text_stream = io.TextIOWrapper(uploaded.stream, encoding="utf-8-sig", newline="")
-                inserted, updated = ingest_csv_stream(db, text_stream, uploaded.filename)
-                import_result = f"Import complete to Azure SQL. Inserted: {inserted}, Updated: {updated}."
+                inserted, updated, skipped = ingest_csv_stream(db, text_stream, uploaded.filename)
+                import_result = (
+                    f"Import complete to Azure SQL. Inserted: {inserted}, Updated: {updated}, "
+                    f"Skipped (no employee_id and no name match): {skipped}."
+                )
 
         members = fetch_members(db)
         db.close()
