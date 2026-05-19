@@ -13,7 +13,7 @@
   <ul>
     {% for approval_id, item in pending_approvals.items() %}
       <li>
-        No exact match for <strong>{{ item.name }}</strong>. Suggested employee_id <strong>{{ item.employee_id }}</strong> (score {{ item.score }}).
+        No exact match for <strong>{{ item.name }}</strong>. Suggested match: <strong>{{ item.suggested_name }}</strong> (employee_id <strong>{{ item.employee_id }}</strong>, score {{ item.score }}).
         <form method="post" action="/approve" style="display:inline;">
           <input type="hidden" name="approval_id" value="{{ approval_id }}" />
           <button type="submit">Approve</button>

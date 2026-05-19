@@ -53,32 +53,35 @@ def swapped_name_variants(name: str) -> set[str]:
     return {v for v in variants if v}
 
 
-def build_name_index(db: Any) -> dict[str, str]:
+def build_name_index(db: Any) -> dict[str, tuple[str, str]]:
     cursor = db.cursor()
     cursor.execute("SELECT employee_id, name FROM dbo.agency_members WHERE name IS NOT NULL")
-    name_index: dict[str, str] = {}
+    name_index: dict[str, tuple[str, str]] = {}
     for emp_id, name in cursor.fetchall():
-        for v in swapped_name_variants(str(name or "")):
+        existing_name = str(name or "")
+        for v in swapped_name_variants(existing_name):
             if v not in name_index:
-                name_index[v] = str(emp_id)
+                name_index[v] = (str(emp_id), existing_name)
     return name_index
 
 
-def best_fuzzy_match(name: str, name_index: dict[str, str]) -> tuple[str, str, float]:
+def best_fuzzy_match(name: str, name_index: dict[str, tuple[str, str]]) -> tuple[str, str, str, float]:
     candidates = swapped_name_variants(name)
     best_emp_id = ""
     best_variant = ""
+    best_existing_name = ""
     best_score = 0.0
 
     for candidate in candidates:
-        for existing_variant, emp_id in name_index.items():
+        for existing_variant, (emp_id, existing_name) in name_index.items():
             score = SequenceMatcher(None, candidate, existing_variant).ratio()
             if score > best_score:
                 best_score = score
                 best_variant = existing_variant
                 best_emp_id = emp_id
+                best_existing_name = existing_name
 
-    return best_emp_id, best_variant, best_score
+    return best_emp_id, best_existing_name, best_variant, best_score
 
 
 def get_db() -> Any:
@@ -168,13 +171,13 @@ def ingest_csv_stream(db: Any, csv_stream: io.TextIOBase, source_name: str) -> t
         if not existing and payload["name"]:
             for variant in swapped_name_variants(payload["name"]):
                 if variant in name_index:
-                    target_employee_id = name_index[variant]
+                    target_employee_id = name_index[variant][0]
                     existing = (target_employee_id,)
                     logs.append(f"MATCH name: '{payload['name']}' -> employee_id {target_employee_id}")
                     break
 
         if not existing and payload["name"]:
-            fuzzy_emp_id, fuzzy_variant, fuzzy_score = best_fuzzy_match(payload["name"], name_index)
+            fuzzy_emp_id, fuzzy_existing_name, fuzzy_variant, fuzzy_score = best_fuzzy_match(payload["name"], name_index)
             if fuzzy_score >= 0.8 and fuzzy_emp_id:
                 approval_id = f"{source_name}:{i}:{payload['name']}"
                 PENDING_APPROVALS[approval_id] = {
@@ -182,10 +185,11 @@ def ingest_csv_stream(db: Any, csv_stream: io.TextIOBase, source_name: str) -> t
                     "name": payload["name"],
                     "score": f"{fuzzy_score:.2f}",
                     "variant": fuzzy_variant,
+                    "suggested_name": fuzzy_existing_name,
                     **payload,
                 }
                 logs.append(
-                    f"NO exact match: '{payload['name']}' | suggestion employee_id={fuzzy_emp_id} score={fuzzy_score:.2f}"
+                    f"NO exact match: '{payload['name']}' | suggestion employee_id={fuzzy_emp_id} name='{fuzzy_existing_name}' score={fuzzy_score:.2f}"
                 )
                 continue
 
@@ -193,7 +197,7 @@ def ingest_csv_stream(db: Any, csv_stream: io.TextIOBase, source_name: str) -> t
             _update_member(cursor, payload, target_employee_id)
             updated += 1
             for v in swapped_name_variants(payload["name"]):
-                name_index[v] = target_employee_id
+                name_index[v] = (target_employee_id, payload["name"])
         else:
             if not payload["employee_id"]:
                 skipped += 1
