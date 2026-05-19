@@ -34,8 +34,8 @@ CSV_FIELD_ALIASES = {
 
 def normalize_name(name: str) -> str:
     cleaned = re.sub(r"[^a-z0-9\s]", " ", (name or "").lower())
-    cleaned = " ".join(cleaned.split())
-    return cleaned
+    tokens = [token for token in cleaned.split() if len(token) > 1]
+    return " ".join(tokens)
 
 
 def swapped_name_variants(name: str) -> set[str]:
@@ -226,8 +226,11 @@ def ingest_csv_stream(db: Any, csv_stream: io.TextIOBase, source_name: str) -> t
                 name_index[v] = payload["employee_id"]
 
     db.commit()
-    logs.append(f"SUMMARY inserted={inserted} updated={updated} skipped={skipped}")
-    return inserted, updated, skipped, logs
+    summary_line = f"SUMMARY inserted={inserted} updated={updated} skipped={skipped}"
+    no_match_logs = [line for line in logs if line.startswith("NO ") or line.startswith("SKIP ")]
+    matched_logs = [line for line in logs if line not in no_match_logs]
+    ordered_logs = no_match_logs + matched_logs + [summary_line]
+    return inserted, updated, skipped, ordered_logs
 
 
 def fetch_members(db: Any):

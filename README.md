@@ -55,6 +55,7 @@ For rows without `employee_id`, importer now matches by normalized name:
 - case-insensitive
 - ignores punctuation (including commas)
 - collapses extra spaces
+- ignores one-letter tokens (middle initials)
 - tries swapped order (first/last and last/first forms)
 
 The UI now shows per-row ingest logs for matched/unmatched rows.
