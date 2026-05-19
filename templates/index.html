@@ -4,66 +4,53 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Personnel Admin Portal</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 2rem; }
-    .container { max-width: 1200px; margin: 0 auto; }
-    form { margin-bottom: 1rem; }
-    input[type="text"] { width: 420px; padding: 0.45rem; }
-    button { padding: 0.5rem 0.8rem; }
-    .result { margin: 0.6rem 0; font-weight: bold; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: left; }
-    th { background: #f5f5f5; }
-  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Personnel Admin Portal</h1>
-    <p>Initial MVP: import personnel CSV into SQL and render it.</p>
+  <h1>Personnel Admin Portal</h1>
+  <p>Upload a CSV file to ingest personnel into SQL.</p>
 
-    <form method="post">
-      <label for="csv_path">CSV file path (relative or absolute):</label><br />
-      <input id="csv_path" name="csv_path" type="text" placeholder="{{ default_csv }}" />
-      <button type="submit">Import CSV</button>
-    </form>
+  <form method="post" enctype="multipart/form-data">
+    <label for="csv_file">Select CSV file:</label>
+    <input id="csv_file" name="csv_file" type="file" accept=".csv,text/csv" />
+    <button type="submit">Upload CSV</button>
+  </form>
 
-    {% if import_result %}
-      <div class="result">{{ import_result }}</div>
-    {% endif %}
+  <p><strong>Accepted minimum fields:</strong> <code>Employee ID</code>, <code>Worker</code>, <code>Worker/Position Job Profile</code>.</p>
 
-    <h2>Agency Members ({{ members|length }})</h2>
-    <table>
-      <thead>
+  {% if import_result %}
+    <p><strong>{{ import_result }}</strong></p>
+  {% endif %}
+
+  <h2>Agency Members ({{ members|length }})</h2>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <thead>
+      <tr>
+        <th>Employee ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Rank / Job Profile</th>
+        <th>Division</th>
+        <th>Status</th>
+        <th>Badge #</th>
+        <th>Imported At</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in members %}
         <tr>
-          <th>Employee ID</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Rank</th>
-          <th>Division</th>
-          <th>Status</th>
-          <th>Badge #</th>
-          <th>Imported At</th>
+          <td>{{ m.employee_id }}</td>
+          <td>{{ m.name }}</td>
+          <td>{{ m.email }}</td>
+          <td>{{ m.rank }}</td>
+          <td>{{ m.division }}</td>
+          <td>{{ m.status }}</td>
+          <td>{{ m.badge_number }}</td>
+          <td>{{ m.imported_at }}</td>
         </tr>
-      </thead>
-      <tbody>
-        {% for m in members %}
-          <tr>
-            <td>{{ m.employee_id }}</td>
-            <td>{{ m.name }}</td>
-            <td>{{ m.email }}</td>
-            <td>{{ m.rank }}</td>
-            <td>{{ m.division }}</td>
-            <td>{{ m.status }}</td>
-            <td>{{ m.badge_number }}</td>
-            <td>{{ m.imported_at }}</td>
-          </tr>
-        {% else %}
-          <tr>
-            <td colspan="8">No records loaded yet. Import a CSV to get started.</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+      {% else %}
+        <tr><td colspan="8">No records loaded yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </body>
 </html>

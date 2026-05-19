@@ -1,11 +1,22 @@
 # Personnel Search MVP
 
-Initial MVP for the personnel admin portal:
+This MVP now supports uploading a CSV from your computer directly in the browser.
 
-- Import a CSV file into an SQL table (`agency_members`) using `employee_id` as primary key.
-- Display imported personnel records on a web page.
+## What it does
 
-## Run locally
+- Creates `agency_members` table in SQLite.
+- Ingests uploaded CSV records keyed by `employee_id`.
+- Displays imported personnel in the web UI.
+
+## Minimum supported CSV columns
+
+- `Employee ID` (required)
+- `Worker` (mapped to `name`)
+- `Worker/Position Job Profile` (mapped to `rank`)
+
+Also supports canonical names such as `employee_id`, `name`, and `rank`.
+
+## Run
 
 ```bash
 python -m venv .venv
@@ -14,16 +25,4 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Open `http://localhost:8000` and click **Import CSV** to load `data/agency_members.csv`.
-
-## CSV format
-
-Expected columns:
-
-- `employee_id`
-- `name`
-- `email`
-- `rank`
-- `division`
-- `status`
-- `badge_number`
+Open `http://localhost:8000`, choose a CSV with the file picker, and click **Upload CSV**.

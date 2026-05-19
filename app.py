@@ -1,4 +1,5 @@
 import csv
+import io
 import os
 import sqlite3
 from pathlib import Path
@@ -10,6 +11,17 @@ DATABASE_PATH = BASE_DIR / "personnel.db"
 DEFAULT_CSV_PATH = BASE_DIR / "data" / "agency_members.csv"
 
 app = Flask(__name__)
+
+
+CSV_FIELD_ALIASES = {
+    "employee_id": ["employee_id", "Employee ID", "employee id", "EmployeeId"],
+    "name": ["name", "Name", "Worker", "worker"],
+    "rank": ["rank", "Rank", "Worker/Position Job Profile", "Job Profile"],
+    "division": ["division", "Division"],
+    "email": ["email", "Email"],
+    "status": ["status", "Status"],
+    "badge_number": ["badge_number", "Badge Number", "badge number"],
+}
 
 
 def get_db() -> sqlite3.Connection:
@@ -46,72 +58,79 @@ def initialize_database() -> None:
     db.commit()
 
 
-def ingest_csv(csv_path: Path) -> tuple[int, int]:
-    """Ingest CSV rows into agency_members.
+def _get_field(row: dict[str, str], canonical_name: str) -> str:
+    aliases = CSV_FIELD_ALIASES[canonical_name]
+    for key in aliases:
+        value = row.get(key)
+        if value is not None and str(value).strip():
+            return str(value).strip()
+    return ""
 
-    Returns a tuple of (inserted_count, updated_count).
-    """
+
+def ingest_csv_stream(csv_stream: io.TextIOBase, source_name: str) -> tuple[int, int]:
     inserted = 0
     updated = 0
+    reader = csv.DictReader(csv_stream)
+    db = get_db()
 
-    with csv_path.open("r", encoding="utf-8-sig", newline="") as csv_file:
-        reader = csv.DictReader(csv_file)
-        db = get_db()
+    for row in reader:
+        employee_id = _get_field(row, "employee_id")
+        if not employee_id:
+            continue
 
-        for row in reader:
-            employee_id = (row.get("employee_id") or "").strip()
-            if not employee_id:
-                continue
+        payload = {
+            "employee_id": employee_id,
+            "name": _get_field(row, "name"),
+            "email": _get_field(row, "email"),
+            "rank": _get_field(row, "rank"),
+            "division": _get_field(row, "division"),
+            "status": _get_field(row, "status"),
+            "badge_number": _get_field(row, "badge_number"),
+            "source_file": source_name,
+        }
 
-            payload = {
-                "employee_id": employee_id,
-                "name": (row.get("name") or "").strip(),
-                "email": (row.get("email") or "").strip(),
-                "rank": (row.get("rank") or "").strip(),
-                "division": (row.get("division") or "").strip(),
-                "status": (row.get("status") or "").strip(),
-                "badge_number": (row.get("badge_number") or "").strip(),
-                "source_file": str(csv_path.name),
-            }
+        existing = db.execute(
+            "SELECT employee_id FROM agency_members WHERE employee_id = ?",
+            (employee_id,),
+        ).fetchone()
 
-            existing = db.execute(
-                "SELECT employee_id FROM agency_members WHERE employee_id = ?",
-                (employee_id,),
-            ).fetchone()
-
-            if existing:
-                db.execute(
-                    """
-                    UPDATE agency_members
-                    SET name = :name,
-                        email = :email,
-                        rank = :rank,
-                        division = :division,
-                        status = :status,
-                        badge_number = :badge_number,
-                        source_file = :source_file,
-                        imported_at = CURRENT_TIMESTAMP
-                    WHERE employee_id = :employee_id
-                    """,
-                    payload,
+        if existing:
+            db.execute(
+                """
+                UPDATE agency_members
+                SET name = :name,
+                    email = :email,
+                    rank = :rank,
+                    division = :division,
+                    status = :status,
+                    badge_number = :badge_number,
+                    source_file = :source_file,
+                    imported_at = CURRENT_TIMESTAMP
+                WHERE employee_id = :employee_id
+                """,
+                payload,
+            )
+            updated += 1
+        else:
+            db.execute(
+                """
+                INSERT INTO agency_members (
+                    employee_id, name, email, rank, division, status, badge_number, source_file
+                ) VALUES (
+                    :employee_id, :name, :email, :rank, :division, :status, :badge_number, :source_file
                 )
-                updated += 1
-            else:
-                db.execute(
-                    """
-                    INSERT INTO agency_members (
-                        employee_id, name, email, rank, division, status, badge_number, source_file
-                    ) VALUES (
-                        :employee_id, :name, :email, :rank, :division, :status, :badge_number, :source_file
-                    )
-                    """,
-                    payload,
-                )
-                inserted += 1
+                """,
+                payload,
+            )
+            inserted += 1
 
-        db.commit()
-
+    db.commit()
     return inserted, updated
+
+
+def ingest_csv(csv_path: Path) -> tuple[int, int]:
+    with csv_path.open("r", encoding="utf-8-sig", newline="") as csv_file:
+        return ingest_csv_stream(csv_file, csv_path.name)
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -120,31 +139,27 @@ def index():
 
     import_result = None
     if request.method == "POST":
-        csv_input = request.form.get("csv_path", "").strip()
-        csv_path = Path(csv_input) if csv_input else DEFAULT_CSV_PATH
-
-        if not csv_path.is_absolute():
-            csv_path = BASE_DIR / csv_path
-
-        if csv_path.exists() and csv_path.is_file():
-            inserted, updated = ingest_csv(csv_path)
+        uploaded = request.files.get("csv_file")
+        if uploaded and uploaded.filename:
+            text_stream = io.TextIOWrapper(uploaded.stream, encoding="utf-8-sig", newline="")
+            inserted, updated = ingest_csv_stream(text_stream, uploaded.filename)
             import_result = f"Import complete. Inserted: {inserted}, Updated: {updated}."
         else:
-            import_result = f"File not found: {csv_path}"
+            if DEFAULT_CSV_PATH.exists():
+                inserted, updated = ingest_csv(DEFAULT_CSV_PATH)
+                import_result = f"No file uploaded. Imported default CSV. Inserted: {inserted}, Updated: {updated}."
+            else:
+                import_result = "No file uploaded and default CSV file not found."
 
-    query = """
+    members = get_db().execute(
+        """
         SELECT employee_id, name, email, rank, division, status, badge_number, imported_at
         FROM agency_members
         ORDER BY name COLLATE NOCASE, employee_id
-    """
-    members = get_db().execute(query).fetchall()
+        """
+    ).fetchall()
 
-    return render_template(
-        "index.html",
-        members=members,
-        import_result=import_result,
-        default_csv=str(DEFAULT_CSV_PATH.relative_to(BASE_DIR)),
-    )
+    return render_template("index.html", members=members, import_result=import_result)
 
 
 if __name__ == "__main__":
