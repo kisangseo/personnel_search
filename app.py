@@ -1,6 +1,7 @@
 import csv
 import io
 import os
+import re
 from typing import Any
 
 import pyodbc
@@ -29,6 +30,44 @@ CSV_FIELD_ALIASES = {
     "race": ["Race", "race"],
     "sex": ["Sex", "sex"],
 }
+
+
+def normalize_name(name: str) -> str:
+    cleaned = re.sub(r"[^a-z0-9\s]", " ", (name or "").lower())
+    cleaned = " ".join(cleaned.split())
+    return cleaned
+
+
+def swapped_name_variants(name: str) -> set[str]:
+    normalized = normalize_name(name)
+    if not normalized:
+        return set()
+
+    parts = normalized.split()
+    variants = {normalized}
+
+    if len(parts) >= 2:
+        variants.add(" ".join([parts[-1], *parts[:-1]]))
+
+    if "," in (name or ""):
+        raw_parts = [p.strip() for p in name.split(",") if p.strip()]
+        if len(raw_parts) >= 2:
+            combined = normalize_name(" ".join(raw_parts[1:] + [raw_parts[0]]))
+            if combined:
+                variants.add(combined)
+
+    return {v for v in variants if v}
+
+
+def build_name_index(db: Any) -> dict[str, str]:
+    cursor = db.cursor()
+    cursor.execute("SELECT employee_id, name FROM dbo.agency_members WHERE name IS NOT NULL")
+    name_index: dict[str, str] = {}
+    for emp_id, name in cursor.fetchall():
+        for v in swapped_name_variants(str(name or "")):
+            if v not in name_index:
+                name_index[v] = str(emp_id)
+    return name_index
 
 
 def get_db() -> Any:
@@ -78,12 +117,14 @@ def _get_field(row: dict[str, str], canonical_name: str) -> str:
     return ""
 
 
-def ingest_csv_stream(db: Any, csv_stream: io.TextIOBase, source_name: str) -> tuple[int, int, int]:
+def ingest_csv_stream(db: Any, csv_stream: io.TextIOBase, source_name: str) -> tuple[int, int, int, list[str]]:
     inserted = 0
     updated = 0
     skipped = 0
+    logs: list[str] = []
     reader = csv.DictReader(csv_stream)
     cursor = db.cursor()
+    name_index = build_name_index(db)
 
     for row in reader:
         payload = {
@@ -107,12 +148,26 @@ def ingest_csv_stream(db: Any, csv_stream: io.TextIOBase, source_name: str) -> t
         if target_employee_id:
             cursor.execute("SELECT employee_id FROM dbo.agency_members WHERE employee_id = ?", target_employee_id)
             existing = cursor.fetchone()
+            if existing:
+                logs.append(f"MATCH employee_id: {payload['employee_id']} -> update")
+            else:
+                logs.append(f"NO employee_id match: {payload['employee_id']}")
         elif payload["name"]:
-            cursor.execute("SELECT TOP 1 employee_id FROM dbo.agency_members WHERE name = ?", payload["name"])
-            existing = cursor.fetchone()
-            target_employee_id = existing[0] if existing else ""
+            existing = None
+            matched_variant = ""
+            for variant in swapped_name_variants(payload["name"]):
+                if variant in name_index:
+                    target_employee_id = name_index[variant]
+                    existing = (target_employee_id,)
+                    matched_variant = variant
+                    break
+            if existing:
+                logs.append(f"MATCH name: '{payload['name']}' (normalized='{matched_variant}') -> employee_id {target_employee_id}")
+            else:
+                logs.append(f"NO name match: '{payload['name']}'")
         else:
             existing = None
+            logs.append("SKIP row missing employee_id and name")
 
         if existing:
             cursor.execute(
@@ -138,6 +193,8 @@ def ingest_csv_stream(db: Any, csv_stream: io.TextIOBase, source_name: str) -> t
                 target_employee_id,
             )
             updated += 1
+            for v in swapped_name_variants(payload["name"]):
+                name_index[v] = target_employee_id
         else:
             if not payload["employee_id"]:
                 skipped += 1
@@ -165,9 +222,12 @@ def ingest_csv_stream(db: Any, csv_stream: io.TextIOBase, source_name: str) -> t
                 payload["source_file"],
             )
             inserted += 1
+            for v in swapped_name_variants(payload["name"]):
+                name_index[v] = payload["employee_id"]
 
     db.commit()
-    return inserted, updated, skipped
+    logs.append(f"SUMMARY inserted={inserted} updated={updated} skipped={skipped}")
+    return inserted, updated, skipped, logs
 
 
 def fetch_members(db: Any):
@@ -206,6 +266,7 @@ def index():
     import_result = None
     db_error = None
     members = []
+    ingest_logs: list[str] = []
 
     try:
         db = get_db()
@@ -217,7 +278,7 @@ def index():
                 import_result = "Please choose a CSV file before clicking Upload CSV."
             else:
                 text_stream = io.TextIOWrapper(uploaded.stream, encoding="utf-8-sig", newline="")
-                inserted, updated, skipped = ingest_csv_stream(db, text_stream, uploaded.filename)
+                inserted, updated, skipped, ingest_logs = ingest_csv_stream(db, text_stream, uploaded.filename)
                 import_result = (
                     f"Import complete to Azure SQL. Inserted: {inserted}, Updated: {updated}, "
                     f"Skipped (no employee_id and no name match): {skipped}."
@@ -228,7 +289,7 @@ def index():
     except Exception as exc:
         db_error = str(exc)
 
-    return render_template("index.html", members=members, import_result=import_result, db_error=db_error)
+    return render_template("index.html", members=members, import_result=import_result, db_error=db_error, ingest_logs=ingest_logs)
 
 
 if __name__ == "__main__":

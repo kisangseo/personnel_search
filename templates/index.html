@@ -9,6 +9,13 @@
   <form method="post" enctype="multipart/form-data"><label for="csv_file">Select CSV file:</label><input id="csv_file" name="csv_file" type="file" accept=".csv,text/csv" required /><button type="submit">Upload CSV</button></form>
   <p><strong>Accepted matching:</strong> employee_id first, then exact name match if employee_id is blank.</p>
   {% if import_result %}<p><strong>{{ import_result }}</strong></p>{% endif %}
+
+  {% if ingest_logs and ingest_logs|length > 0 %}
+  <h3>Ingest Logs (latest upload)</h3>
+  <pre style="max-height:300px;overflow:auto;background:#f4f4f4;padding:10px;">{% for line in ingest_logs %}{{ line }}
+{% endfor %}</pre>
+  {% endif %}
+
   <h2>Agency Members ({{ members|length }})</h2>
   <table border="1" cellpadding="6" cellspacing="0">
     <thead><tr><th>Employee ID</th><th>Name</th><th>Email</th><th>Rank</th><th>Division</th><th>Status</th><th>Badge #</th><th>Sequence</th><th>Department Cell</th><th>Radio ID</th><th>Race</th><th>Sex</th><th>Imported At</th></tr></thead>

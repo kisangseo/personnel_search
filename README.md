@@ -47,3 +47,14 @@ FROM INFORMATION_SCHEMA.COLUMNS
 WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'agency_members'
 ORDER BY ORDINAL_POSITION;
 ```
+
+
+## Name matching normalization
+
+For rows without `employee_id`, importer now matches by normalized name:
+- case-insensitive
+- ignores punctuation (including commas)
+- collapses extra spaces
+- tries swapped order (first/last and last/first forms)
+
+The UI now shows per-row ingest logs for matched/unmatched rows.
