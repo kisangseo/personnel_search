@@ -181,12 +181,12 @@ def ingest_csv_stream(db: Any, csv_stream: io.TextIOBase, source_name: str) -> t
             if fuzzy_score >= 0.8 and fuzzy_emp_id:
                 approval_id = f"{source_name}:{i}:{payload['name']}"
                 PENDING_APPROVALS[approval_id] = {
+                    **payload,
                     "employee_id": fuzzy_emp_id,
                     "name": payload["name"],
                     "score": f"{fuzzy_score:.2f}",
                     "variant": fuzzy_variant,
                     "suggested_name": fuzzy_existing_name,
-                    **payload,
                 }
                 logs.append(
                     f"NO exact match: '{payload['name']}' | suggestion employee_id={fuzzy_emp_id} name='{fuzzy_existing_name}' score={fuzzy_score:.2f}"
