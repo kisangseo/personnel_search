@@ -59,3 +59,8 @@ For rows without `employee_id`, importer now matches by normalized name:
 - tries swapped order (first/last and last/first forms)
 
 The UI now shows per-row ingest logs for matched/unmatched rows.
+
+
+## Fuzzy matching
+
+When no exact match is found, importer tries 80% fuzzy name similarity and creates an approval suggestion in the UI.
