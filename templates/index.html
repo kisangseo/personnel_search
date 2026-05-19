@@ -15,7 +15,7 @@
       <select name="search_division">
         <option value="">All</option>
         {% for d in divisions %}
-          <option value="{{ d }}" {% if search_division == d %}selected{% endif %}>{{ d }}</option>
+          <option value="{{ d }}" {% if search_division == d %}selected{% endif %}>{{ d|replace("_", " ") }}</option>
         {% endfor %}
       </select>
     </label>
@@ -46,6 +46,6 @@
   {% endif %}
 
   <h2>Agency Members ({{ members|length }})</h2>
-  <table border="1" cellpadding="6" cellspacing="0"><thead><tr><th>Employee ID</th><th>Name</th><th>Email</th><th>Rank</th><th>Division</th><th>Status</th><th>Badge #</th><th>Sequence</th><th>Department Cell</th><th>Radio ID</th><th>Race</th><th>Sex</th><th>Imported At</th></tr></thead><tbody>{% for m in members %}<tr><td>{{ m.employee_id }}</td><td>{{ m.name }}</td><td>{{ m.email }}</td><td>{{ m.rank }}</td><td>{{ m.division }}</td><td>{{ m.status }}</td><td>{{ m.badge_number }}</td><td>{{ m.sequence_num }}</td><td>{{ m.department_cell }}</td><td>{{ m.radio_id }}</td><td>{{ m.race }}</td><td>{{ m.sex }}</td><td>{{ m.imported_at }}</td></tr>{% else %}<tr><td colspan="13">No records loaded yet.</td></tr>{% endfor %}</tbody></table>
+  <table border="1" cellpadding="6" cellspacing="0"><thead><tr><th>Employee ID</th><th>Name</th><th>Email</th><th>Rank</th><th>Division</th><th>Status</th><th>Sequence</th><th>Department Cell</th><th>Radio ID</th><th>Race</th><th>Sex</th><th>Imported At</th></tr></thead><tbody>{% for m in members %}<tr><td>{{ m.employee_id }}</td><td>{{ m.name }}</td><td>{{ m.email }}</td><td>{{ m.rank }}</td><td>{{ m.division|replace("_", " ") }}</td><td>{{ m.status }}</td><td>{{ m.sequence_num }}</td><td>{{ m.department_cell }}</td><td>{{ m.radio_id }}</td><td>{{ m.race }}</td><td>{{ m.sex }}</td><td>{{ m.imported_at }}</td></tr>{% else %}<tr><td colspan="12">No records loaded yet.</td></tr>{% endfor %}</tbody></table>
 </body>
 </html>
