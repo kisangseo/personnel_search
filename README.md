@@ -26,3 +26,39 @@ python app.py
 ```
 
 Open `http://localhost:8000`, choose a CSV with the file picker, and click **Upload CSV**.
+
+
+## SQL to create/verify required table + fields
+
+Use these SQL statements in SQLite to ensure the table and fields exist:
+
+```sql
+CREATE TABLE IF NOT EXISTS agency_members (
+    employee_id TEXT PRIMARY KEY,
+    name TEXT,
+    email TEXT,
+    rank TEXT,
+    division TEXT,
+    status TEXT,
+    badge_number TEXT,
+    source_file TEXT,
+    imported_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_agency_members_name ON agency_members(name);
+CREATE INDEX IF NOT EXISTS idx_agency_members_email ON agency_members(email);
+CREATE INDEX IF NOT EXISTS idx_agency_members_badge_number ON agency_members(badge_number);
+CREATE INDEX IF NOT EXISTS idx_agency_members_division ON agency_members(division);
+```
+
+To check whether all required columns exist:
+
+```sql
+PRAGMA table_info(agency_members);
+```
+
+If a column is missing, add it (example):
+
+```sql
+ALTER TABLE agency_members ADD COLUMN badge_number TEXT;
+```

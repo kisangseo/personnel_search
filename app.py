@@ -9,6 +9,7 @@ from flask import Flask, g, render_template, request
 BASE_DIR = Path(__file__).resolve().parent
 DATABASE_PATH = BASE_DIR / "personnel.db"
 DEFAULT_CSV_PATH = BASE_DIR / "data" / "agency_members.csv"
+SCHEMA_PATH = BASE_DIR / "db_schema.sql"
 
 app = Flask(__name__)
 
@@ -40,21 +41,49 @@ def close_db(_exception: Exception | None) -> None:
 
 def initialize_database() -> None:
     db = get_db()
-    db.execute(
-        """
-        CREATE TABLE IF NOT EXISTS agency_members (
-            employee_id TEXT PRIMARY KEY,
-            name TEXT,
-            email TEXT,
-            rank TEXT,
-            division TEXT,
-            status TEXT,
-            badge_number TEXT,
-            source_file TEXT,
-            imported_at TEXT DEFAULT CURRENT_TIMESTAMP
+
+    # Run canonical schema file first.
+    if SCHEMA_PATH.exists():
+        db.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
+
+    # Backfill any missing columns for older databases.
+    expected_columns = {
+        "employee_id": "TEXT",
+        "name": "TEXT",
+        "email": "TEXT",
+        "rank": "TEXT",
+        "division": "TEXT",
+        "status": "TEXT",
+        "badge_number": "TEXT",
+        "source_file": "TEXT",
+        "imported_at": "TEXT DEFAULT CURRENT_TIMESTAMP",
+    }
+
+    existing_cols = {row[1] for row in db.execute("PRAGMA table_info(agency_members)").fetchall()}
+
+    # Table may not exist if schema file is missing.
+    if not existing_cols:
+        db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS agency_members (
+                employee_id TEXT PRIMARY KEY,
+                name TEXT,
+                email TEXT,
+                rank TEXT,
+                division TEXT,
+                status TEXT,
+                badge_number TEXT,
+                source_file TEXT,
+                imported_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+            """
         )
-        """
-    )
+        existing_cols = {row[1] for row in db.execute("PRAGMA table_info(agency_members)").fetchall()}
+
+    for col, col_type in expected_columns.items():
+        if col not in existing_cols:
+            db.execute(f"ALTER TABLE agency_members ADD COLUMN {col} {col_type}")
+
     db.commit()
 
 
