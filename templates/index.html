@@ -8,6 +8,22 @@
   <form method="post" enctype="multipart/form-data"><input id="csv_file" name="csv_file" type="file" accept=".csv,text/csv" required /><button type="submit">Upload CSV</button></form>
   {% if import_result %}<p><strong>{{ import_result }}</strong></p>{% endif %}
 
+  <h3>Search</h3>
+  <form method="get">
+    <label>Name: <input type="text" name="search_name" value="{{ search_name }}" /></label>
+    <label>Division:
+      <select name="search_division">
+        <option value="">All</option>
+        {% for d in divisions %}
+          <option value="{{ d }}" {% if search_division == d %}selected{% endif %}>{{ d }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Radio ID: <input type="text" name="search_radio_id" value="{{ search_radio_id }}" /></label>
+    <button type="submit">Search</button>
+    <a href="/">Clear</a>
+  </form>
+
   {% if pending_approvals and pending_approvals|length > 0 %}
   <h3>Fuzzy Match Approvals</h3>
   <ul>

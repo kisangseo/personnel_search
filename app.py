@@ -223,11 +223,32 @@ def ingest_csv_stream(db: Any, csv_stream: io.TextIOBase, source_name: str) -> t
     return inserted, updated, skipped, no_match_logs + matched_logs + [f"SUMMARY inserted={inserted} updated={updated} skipped={skipped}"]
 
 
-def fetch_members(db: Any):
+def fetch_members(db: Any, search_name: str = "", search_division: str = "", search_radio_id: str = ""):
     cursor = db.cursor()
-    cursor.execute("SELECT employee_id, name, email, rank, division, status, badge_number, sequence_num, department_cell, radio_id, race, sex, imported_at FROM dbo.agency_members ORDER BY name, employee_id")
+    where_clauses = []
+    params: list[str] = []
+
+    if search_name:
+        where_clauses.append("name LIKE ?")
+        params.append(f"%{search_name}%")
+    if search_division:
+        where_clauses.append("division = ?")
+        params.append(search_division)
+    if search_radio_id:
+        where_clauses.append("radio_id LIKE ?")
+        params.append(f"%{search_radio_id}%")
+
+    where_sql = f" WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+    query = "SELECT employee_id, name, email, rank, division, status, badge_number, sequence_num, department_cell, radio_id, race, sex, imported_at FROM dbo.agency_members" + where_sql + " ORDER BY name, employee_id"
+    cursor.execute(query, params)
     rows = cursor.fetchall()
     return [{"employee_id": r[0], "name": r[1], "email": r[2], "rank": r[3], "division": r[4], "status": r[5], "badge_number": r[6], "sequence_num": r[7], "department_cell": r[8], "radio_id": r[9], "race": r[10], "sex": r[11], "imported_at": r[12]} for r in rows]
+
+
+def fetch_divisions(db: Any) -> list[str]:
+    cursor = db.cursor()
+    cursor.execute("SELECT DISTINCT division FROM dbo.agency_members WHERE division IS NOT NULL AND LTRIM(RTRIM(division)) <> '' ORDER BY division")
+    return [row[0] for row in cursor.fetchall()]
 
 
 @app.post("/approve")
@@ -248,7 +269,12 @@ def index():
     import_result = None
     db_error = None
     members = []
+    divisions: list[str] = []
     ingest_logs: list[str] = []
+
+    search_name = request.values.get("search_name", "").strip()
+    search_division = request.values.get("search_division", "").strip()
+    search_radio_id = request.values.get("search_radio_id", "").strip()
     try:
         db = get_db()
         initialize_database(db)
@@ -260,12 +286,13 @@ def index():
                 import_result = f"Import complete to Azure SQL. Inserted: {inserted}, Updated: {updated}, Skipped: {skipped}."
             else:
                 import_result = "Please choose a CSV file before clicking Upload CSV."
-        members = fetch_members(db)
+        members = fetch_members(db, search_name=search_name, search_division=search_division, search_radio_id=search_radio_id)
+        divisions = fetch_divisions(db)
         db.close()
     except Exception as exc:
         db_error = str(exc)
 
-    return render_template("index.html", members=members, import_result=import_result, db_error=db_error, ingest_logs=ingest_logs, pending_approvals=PENDING_APPROVALS)
+    return render_template("index.html", members=members, import_result=import_result, db_error=db_error, ingest_logs=ingest_logs, pending_approvals=PENDING_APPROVALS, divisions=divisions, search_name=search_name, search_division=search_division, search_radio_id=search_radio_id)
 
 
 if __name__ == "__main__":
