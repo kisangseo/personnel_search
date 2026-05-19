@@ -5,7 +5,7 @@ This app writes to Azure SQL / SQL Server only and ingests personnel CSVs.
 ## New fields added for second CSV
 
 Mapped from your new CSV into SQL columns:
-- Sequence -> `sequence_num`
+- Sequence / Sequence Number -> `sequence_num`
 - Department Cell -> `department_cell`
 - Radio_ID -> `radio_id`
 - Race -> `race`

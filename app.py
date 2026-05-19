@@ -25,7 +25,7 @@ CSV_FIELD_ALIASES = {
     "email": ["email", "Email"],
     "status": ["status", "Status"],
     "badge_number": ["badge_number", "Badge Number", "badge number"],
-    "sequence_num": ["Sequence", "sequence", "sequence_num"],
+    "sequence_num": ["Sequence", "Sequence Number", "sequence", "sequence number", "sequence_num"],
     "department_cell": ["Department Cell", "department cell", "department_cell"],
     "radio_id": ["Radio_ID", "Radio ID", "radio_id", "radio id"],
     "race": ["Race", "race"],
