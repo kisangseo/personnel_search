@@ -7,13 +7,17 @@
 </head>
 <body>
   <h1>Personnel Admin Portal</h1>
-  <p>Upload a CSV file to ingest personnel into SQL.</p>
+  <p>Upload a CSV file to ingest personnel into Azure SQL.</p>
+  <p><strong>Database target:</strong> Azure SQL / SQL Server (required)</p>
 
-  <p><strong>Database target:</strong> {% if using_sql_server %}Azure SQL / SQL Server{% else %}Local SQLite (personnel.db){% endif %}</p>
+  {% if db_error %}
+    <p style="color: #b00020;"><strong>Database connection error:</strong> {{ db_error }}</p>
+    <p>Upload is unavailable until SQL connection is fixed.</p>
+  {% endif %}
 
   <form method="post" enctype="multipart/form-data">
     <label for="csv_file">Select CSV file:</label>
-    <input id="csv_file" name="csv_file" type="file" accept=".csv,text/csv" />
+    <input id="csv_file" name="csv_file" type="file" accept=".csv,text/csv" required />
     <button type="submit">Upload CSV</button>
   </form>
 
