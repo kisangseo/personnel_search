@@ -62,3 +62,19 @@ If a column is missing, add it (example):
 ```sql
 ALTER TABLE agency_members ADD COLUMN badge_number TEXT;
 ```
+
+
+## Azure SQL usage
+
+If you set `PERSONNEL_SQL_CONNECTION_STRING`, the app writes to SQL Server/Azure SQL instead of local SQLite.
+
+Example App Setting:
+
+- `PERSONNEL_SQL_CONNECTION_STRING=Driver={ODBC Driver 18 for SQL Server};Server=...;Database=...;Uid=...;Pwd=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;`
+
+Quick verification query in Azure Data Studio:
+
+```sql
+SELECT COUNT(*) AS row_count FROM dbo.agency_members;
+SELECT TOP 20 * FROM dbo.agency_members ORDER BY imported_at DESC;
+```

@@ -9,6 +9,8 @@
   <h1>Personnel Admin Portal</h1>
   <p>Upload a CSV file to ingest personnel into SQL.</p>
 
+  <p><strong>Database target:</strong> {% if using_sql_server %}Azure SQL / SQL Server{% else %}Local SQLite (personnel.db){% endif %}</p>
+
   <form method="post" enctype="multipart/form-data">
     <label for="csv_file">Select CSV file:</label>
     <input id="csv_file" name="csv_file" type="file" accept=".csv,text/csv" />
