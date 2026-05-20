@@ -6,7 +6,7 @@ from difflib import SequenceMatcher
 from typing import Any
 
 import pyodbc
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 SQL_SERVER_CONN_STR = os.getenv("PERSONNEL_SQL_CONNECTION_STRING", "").strip()
 
@@ -33,6 +33,20 @@ CSV_FIELD_ALIASES = {
 }
 
 PENDING_APPROVALS: dict[str, dict[str, str]] = {}
+
+
+EDITABLE_FIELDS = {
+    "name",
+    "email",
+    "rank",
+    "division",
+    "status",
+    "sequence_num",
+    "department_cell",
+    "radio_id",
+    "race",
+    "sex",
+}
 
 
 def normalize_name(name: str) -> str:
@@ -250,6 +264,29 @@ def fetch_divisions(db: Any) -> list[str]:
     cursor.execute("SELECT DISTINCT division FROM dbo.agency_members WHERE division IS NOT NULL AND LTRIM(RTRIM(division)) <> '' ORDER BY division")
     return [row[0] for row in cursor.fetchall()]
 
+
+
+
+@app.post("/update-cell")
+def update_cell():
+    payload = request.get_json(silent=True) or {}
+    employee_id = str(payload.get("employee_id", "")).strip()
+    field = str(payload.get("field", "")).strip()
+    value = str(payload.get("value", "")).strip()
+
+    if not employee_id or field not in EDITABLE_FIELDS:
+        return jsonify({"ok": False, "error": "Invalid employee_id or field."}), 400
+
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        f"UPDATE dbo.agency_members SET {field} = ?, imported_at = SYSUTCDATETIME() WHERE employee_id = ?",
+        value,
+        employee_id,
+    )
+    db.commit()
+    db.close()
+    return jsonify({"ok": True})
 
 @app.post("/approve")
 def approve_guess():
