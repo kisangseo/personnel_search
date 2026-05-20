@@ -37,6 +37,29 @@ CSV_FIELD_ALIASES = {
 PENDING_APPROVALS: dict[str, dict[str, str]] = {}
 
 
+
+
+DIVISION_GROUPS = {
+    "Command": ["Command", "Command Staff"],
+    "Court Security": ["Court Security", "Court_Security"],
+    "Domestic Violence": ["Domestic Violence", "Domestic_Violence"],
+    "Special Operations": ["Special Operations", "Special_Operations", "SOD"],
+}
+
+
+def normalize_division_value(value: str) -> str:
+    return (value or "").replace("_", " ").strip()
+
+
+def display_division(value: str) -> str:
+    normalized = normalize_division_value(value)
+    for label, variants in DIVISION_GROUPS.items():
+        normalized_variants = {normalize_division_value(v).lower() for v in variants}
+        if normalized.lower() in normalized_variants:
+            return label
+    return normalized
+
+
 EDITABLE_FIELDS = {
     "name",
     "email",
@@ -248,8 +271,14 @@ def fetch_members(db: Any, search_name: str = "", search_division: str = "", sea
         where_clauses.append("name LIKE ?")
         params.append(f"%{search_name}%")
     if search_division:
-        where_clauses.append("division = ?")
-        params.append(search_division)
+        if search_division in DIVISION_GROUPS:
+            variants = DIVISION_GROUPS[search_division]
+            placeholders = ",".join(["?"] * len(variants))
+            where_clauses.append(f"REPLACE(division, '_', ' ') IN ({placeholders})")
+            params.extend([normalize_division_value(v) for v in variants])
+        else:
+            where_clauses.append("REPLACE(division, '_', ' ') = ?")
+            params.append(normalize_division_value(search_division))
     if search_radio_id:
         where_clauses.append("radio_id LIKE ?")
         params.append(f"%{search_radio_id}%")
@@ -258,7 +287,7 @@ def fetch_members(db: Any, search_name: str = "", search_division: str = "", sea
     query = "SELECT employee_id, name, email, rank, division, status, badge_number, sequence_num, department_cell, radio_id, race, sex, imported_at FROM dbo.agency_members" + where_sql + " ORDER BY name, employee_id"
     cursor.execute(query, params)
     rows = cursor.fetchall()
-    return [{"employee_id": r[0], "name": r[1], "email": r[2], "rank": r[3], "division": r[4], "status": r[5], "badge_number": r[6], "sequence_num": r[7], "department_cell": r[8], "radio_id": r[9], "race": r[10], "sex": r[11], "imported_at": r[12]} for r in rows]
+    return [{"employee_id": r[0], "name": r[1], "email": r[2], "rank": r[3], "division": r[4], "division_display": display_division(r[4]), "status": r[5], "badge_number": r[6], "sequence_num": r[7], "department_cell": r[8], "radio_id": r[9], "race": r[10], "sex": r[11], "imported_at": r[12]} for r in rows]
 
 
 
@@ -391,7 +420,9 @@ def fetch_name_suggestions(db: Any, q: str, limit: int = 10) -> list[str]:
 def fetch_divisions(db: Any) -> list[str]:
     cursor = db.cursor()
     cursor.execute("SELECT DISTINCT division FROM dbo.agency_members WHERE division IS NOT NULL AND LTRIM(RTRIM(division)) <> '' ORDER BY division")
-    return [row[0] for row in cursor.fetchall()]
+    raw = [row[0] for row in cursor.fetchall()]
+    mapped = {display_division(v) for v in raw if v}
+    return sorted(mapped)
 
 
 
