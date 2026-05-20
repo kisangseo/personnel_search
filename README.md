@@ -64,3 +64,12 @@ The UI now shows per-row ingest logs for matched/unmatched rows.
 ## Fuzzy matching
 
 When no exact match is found, importer tries 80% fuzzy name similarity and creates an approval suggestion in the UI.
+
+
+## Email Workbook Upload (multi-tab)
+
+You can upload an `.xlsx` workbook that has many tabs.
+- Each tab name is treated as `division`.
+- Rows with detectable email addresses are matched to members by normalized/fuzzy name logic.
+- Exact name matches auto-update `email` and `division`.
+- Fuzzy matches are queued into the existing approval workflow.

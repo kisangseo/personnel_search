@@ -2,9 +2,11 @@ import csv
 import io
 import os
 import re
+from io import BytesIO
 from difflib import SequenceMatcher
 from typing import Any
 
+import openpyxl
 import pyodbc
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
@@ -259,6 +261,115 @@ def fetch_members(db: Any, search_name: str = "", search_division: str = "", sea
     return [{"employee_id": r[0], "name": r[1], "email": r[2], "rank": r[3], "division": r[4], "status": r[5], "badge_number": r[6], "sequence_num": r[7], "department_cell": r[8], "radio_id": r[9], "race": r[10], "sex": r[11], "imported_at": r[12]} for r in rows]
 
 
+
+
+def extract_email_rows_from_workbook(file_bytes: bytes) -> list[dict[str, str]]:
+    wb = openpyxl.load_workbook(filename=BytesIO(file_bytes), data_only=True)
+    rows: list[dict[str, str]] = []
+
+    for ws in wb.worksheets:
+        division = (ws.title or "").strip()
+        max_row = ws.max_row or 0
+        max_col = ws.max_column or 0
+
+        for r in range(1, max_row + 1):
+            values = []
+            for c in range(1, max_col + 1):
+                v = ws.cell(row=r, column=c).value
+                values.append(str(v).strip() if v is not None else "")
+
+            emails = [v for v in values if "@" in v and "." in v]
+            if not emails:
+                continue
+
+            email = emails[0]
+            email_idx = values.index(email)
+            candidate_name = ""
+            for i in range(email_idx - 1, -1, -1):
+                txt = values[i]
+                if txt and txt.lower() not in {"rank", "deputies", "email", "name"}:
+                    candidate_name = txt
+                    break
+
+            if not candidate_name:
+                continue
+
+            rows.append({"name": candidate_name, "email": email, "division": division})
+
+    return rows
+
+
+def ingest_email_workbook(db: Any, file_bytes: bytes, source_name: str) -> tuple[int, int, int, list[str]]:
+    updates = 0
+    approvals = 0
+    skipped = 0
+    logs: list[str] = []
+
+    cursor = db.cursor()
+    name_index = build_name_index(db)
+    workbook_rows = extract_email_rows_from_workbook(file_bytes)
+
+    for i, item in enumerate(workbook_rows, start=1):
+        name = item["name"]
+        email = item["email"]
+        division = item["division"]
+        target_employee_id = ""
+        existing = None
+
+        for variant in swapped_name_variants(name):
+            if variant in name_index:
+                target_employee_id = name_index[variant][0]
+                existing = (target_employee_id,)
+                logs.append(f"EMAIL MATCH name: '{name}' -> employee_id {target_employee_id}")
+                break
+
+        if not existing:
+            fuzzy_emp_id, fuzzy_existing_name, fuzzy_variant, fuzzy_score = best_fuzzy_match(name, name_index)
+            if fuzzy_score >= 0.8 and fuzzy_emp_id:
+                approval_id = f"emailwb:{source_name}:{i}:{name}"
+                PENDING_APPROVALS[approval_id] = {
+                    "employee_id": fuzzy_emp_id,
+                    "name": name,
+                    "email": email,
+                    "division": division,
+                    "rank": "",
+                    "status": "",
+                    "sequence_num": "",
+                    "department_cell": "",
+                    "radio_id": "",
+                    "race": "",
+                    "sex": "",
+                    "badge_number": "",
+                    "source_file": source_name,
+                    "score": f"{fuzzy_score:.2f}",
+                    "variant": fuzzy_variant,
+                    "suggested_name": fuzzy_existing_name,
+                }
+                approvals += 1
+                logs.append(f"EMAIL NO exact match: '{name}' | suggestion '{fuzzy_existing_name}' score={fuzzy_score:.2f}")
+            else:
+                skipped += 1
+                logs.append(f"EMAIL SKIP: '{name}' no match")
+            continue
+
+        cursor.execute(
+            """
+            UPDATE dbo.agency_members
+            SET email = ?, division = ?, source_file = ?, imported_at = SYSUTCDATETIME()
+            WHERE employee_id = ?
+            """,
+            email,
+            division,
+            source_name,
+            target_employee_id,
+        )
+        updates += 1
+
+    db.commit()
+    logs.append(f"EMAIL SUMMARY updated={updates} approvals={approvals} skipped={skipped}")
+    return updates, approvals, skipped, logs
+
+
 def fetch_divisions(db: Any) -> list[str]:
     cursor = db.cursor()
     cursor.execute("SELECT DISTINCT division FROM dbo.agency_members WHERE division IS NOT NULL AND LTRIM(RTRIM(division)) <> '' ORDER BY division")
@@ -316,13 +427,18 @@ def index():
         db = get_db()
         initialize_database(db)
         if request.method == "POST":
+            uploaded_email_wb = request.files.get("email_workbook")
             uploaded = request.files.get("csv_file")
-            if uploaded and uploaded.filename:
+            if uploaded_email_wb and uploaded_email_wb.filename:
+                wb_bytes = uploaded_email_wb.read()
+                updates, approvals, skipped, ingest_logs = ingest_email_workbook(db, wb_bytes, uploaded_email_wb.filename)
+                import_result = f"Email workbook import complete. Updated: {updates}, Pending approvals: {approvals}, Skipped: {skipped}."
+            elif uploaded and uploaded.filename:
                 text_stream = io.TextIOWrapper(uploaded.stream, encoding="utf-8-sig", newline="")
                 inserted, updated, skipped, ingest_logs = ingest_csv_stream(db, text_stream, uploaded.filename)
                 import_result = f"Import complete to Azure SQL. Inserted: {inserted}, Updated: {updated}, Skipped: {skipped}."
             else:
-                import_result = "Please choose a CSV file before clicking Upload CSV."
+                import_result = "Please choose a CSV file or Email Workbook before clicking upload."
         members = fetch_members(db, search_name=search_name, search_division=search_division, search_radio_id=search_radio_id)
         divisions = fetch_divisions(db)
         db.close()
