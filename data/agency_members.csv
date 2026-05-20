@@ -1,0 +1,4 @@
+employee_id,name,email,rank,division,status,badge_number
+1001,Jamie Rivera,jamie.rivera@example.org,Sergeant,Patrol,Active,B-201
+1002,Alex Chen,alex.chen@example.org,Deputy,Detention,Active,B-202
+1003,Morgan Patel,morgan.patel@example.org,Lieutenant,Training,Active,B-203
