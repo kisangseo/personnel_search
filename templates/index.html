@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Personnel Admin Portal</title></head>
+<body>
+  <h1>Personnel Admin Portal</h1>
+  <p>Upload a CSV file to ingest personnel into Azure SQL.</p>
+  {% if db_error %}<p><strong>Database connection error:</strong> {{ db_error }}</p>{% endif %}
+  <form method="post" enctype="multipart/form-data">
+    <label>Personnel CSV:</label> <input id="csv_file" name="csv_file" type="file" accept=".csv,text/csv" />
+    <button type="submit">Upload CSV</button>
+    <br/><br/>
+    <label>Email Workbook (.xlsx, all tabs):</label> <input id="email_workbook" name="email_workbook" type="file" accept=".xlsx" />
+    <button type="submit">Upload Email Workbook</button>
+  </form>
+  {% if import_result %}<p><strong>{{ import_result }}</strong></p>{% endif %}
+
+  <h3>Search</h3>
+  <form method="get">
+    <label>Name: <input type="text" id="search_name" name="search_name" value="{{ search_name }}" autocomplete="off" /></label>
+    <div id="name_suggestions" style="border:1px solid #ccc;display:none;max-width:260px;background:#fff;position:absolute;z-index:10;"></div>
+    <label>Division:
+      <select name="search_division">
+        <option value="">All</option>
+        {% for d in divisions %}
+          <option value="{{ d }}" {% if search_division == d %}selected{% endif %}>{{ d|replace("_", " ") }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Radio ID: <input type="text" name="search_radio_id" value="{{ search_radio_id }}" /></label>
+    <button type="submit">Search</button>
+    <a href="/">Clear</a>
+  </form>
+
+  {% if pending_approvals and pending_approvals|length > 0 %}
+  <h3>Fuzzy Match Approvals</h3>
+  <ul>
+    {% for approval_id, item in pending_approvals.items() %}
+      <li>
+        No exact match for <strong>{{ item.name }}</strong>. Suggested match: <strong>{{ item.suggested_name }}</strong> (employee_id <strong>{{ item.employee_id }}</strong>, score {{ item.score }}).
+        <form method="post" action="/approve" style="display:inline;">
+          <input type="hidden" name="approval_id" value="{{ approval_id }}" />
+          <button type="submit">Approve</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if ingest_logs and ingest_logs|length > 0 %}
+  <h3>Ingest Logs (latest upload)</h3>
+  <pre style="max-height:300px;overflow:auto;background:#f4f4f4;padding:10px;">{% for line in ingest_logs %}{{ line }}
+{% endfor %}</pre>
+  {% endif %}
+
+  <h2>Agency Members ({{ members|length }})</h2>
+  <table border="1" cellpadding="6" cellspacing="0"><thead><tr><th>Employee ID</th><th>Name</th><th>Email</th><th>Rank</th><th>Division</th><th>Status</th><th>Sequence</th><th>Department Cell</th><th>Radio ID</th><th>Race</th><th>Sex</th><th>Imported At</th></tr></thead><tbody>{% for m in members %}<tr><td>{{ m.employee_id }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="name">{{ m.name or '' }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="email">{{ m.email or '' }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="rank">{{ m.rank or '' }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="division">{{ (m.division or '')|replace("_", " ") }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="status">{{ m.status or '' }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="sequence_num">{{ m.sequence_num or '' }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="department_cell">{{ m.department_cell or '' }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="radio_id">{{ m.radio_id or '' }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="race">{{ m.race or '' }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="sex">{{ m.sex or '' }}</td><td>{{ m.imported_at }}</td></tr>{% else %}<tr><td colspan="12">No records loaded yet.</td></tr>{% endfor %}</tbody></table>
+
+<script>
+  async function saveCell(cell) {
+    const employeeId = cell.dataset.employeeId;
+    const field = cell.dataset.field;
+    const value = cell.innerText.trim();
+    const oldValue = cell.dataset.originalValue ?? '';
+    if (value === oldValue) return;
+
+    const res = await fetch('/update-cell', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({employee_id: employeeId, field, value})
+    });
+
+    if (res.ok) {
+      cell.dataset.originalValue = value;
+    } else {
+      alert('Failed to save cell.');
+      cell.innerText = oldValue;
+    }
+  }
+
+
+  const nameInput = document.getElementById('search_name');
+  const suggestionsBox = document.getElementById('name_suggestions');
+
+  async function loadNameSuggestions() {
+    const q = nameInput.value.trim();
+    if (q.length < 3) {
+      suggestionsBox.style.display = 'none';
+      suggestionsBox.innerHTML = '';
+      return;
+    }
+
+    const res = await fetch(`/name-suggestions?q=${encodeURIComponent(q)}`);
+    if (!res.ok) {
+      suggestionsBox.style.display = 'none';
+      return;
+    }
+    const data = await res.json();
+    const suggestions = data.suggestions || [];
+
+    if (!suggestions.length) {
+      suggestionsBox.style.display = 'none';
+      suggestionsBox.innerHTML = '';
+      return;
+    }
+
+    suggestionsBox.innerHTML = suggestions
+      .map((name) => `<div class="name-suggestion" style="padding:6px;cursor:pointer;">${name}</div>`)
+      .join('');
+    suggestionsBox.style.display = 'block';
+
+    document.querySelectorAll('.name-suggestion').forEach((el) => {
+      el.addEventListener('click', () => {
+        nameInput.value = el.textContent;
+        suggestionsBox.style.display = 'none';
+      });
+    });
+  }
+
+  if (nameInput) {
+    nameInput.addEventListener('input', loadNameSuggestions);
+    nameInput.addEventListener('blur', () => setTimeout(() => { suggestionsBox.style.display = 'none'; }, 150));
+    nameInput.addEventListener('focus', loadNameSuggestions);
+  }
+
+  document.querySelectorAll('td.editable').forEach((cell) => {
+    cell.dataset.originalValue = cell.innerText.trim();
+    cell.addEventListener('blur', () => saveCell(cell));
+    cell.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        cell.blur();
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
