@@ -16,7 +16,8 @@
 
   <h3>Search</h3>
   <form method="get">
-    <label>Name: <input type="text" name="search_name" value="{{ search_name }}" /></label>
+    <label>Name: <input type="text" id="search_name" name="search_name" value="{{ search_name }}" autocomplete="off" /></label>
+    <div id="name_suggestions" style="border:1px solid #ccc;display:none;max-width:260px;background:#fff;position:absolute;z-index:10;"></div>
     <label>Division:
       <select name="search_division">
         <option value="">All</option>
@@ -74,6 +75,51 @@
       alert('Failed to save cell.');
       cell.innerText = oldValue;
     }
+  }
+
+
+  const nameInput = document.getElementById('search_name');
+  const suggestionsBox = document.getElementById('name_suggestions');
+
+  async function loadNameSuggestions() {
+    const q = nameInput.value.trim();
+    if (q.length < 3) {
+      suggestionsBox.style.display = 'none';
+      suggestionsBox.innerHTML = '';
+      return;
+    }
+
+    const res = await fetch(`/name-suggestions?q=${encodeURIComponent(q)}`);
+    if (!res.ok) {
+      suggestionsBox.style.display = 'none';
+      return;
+    }
+    const data = await res.json();
+    const suggestions = data.suggestions || [];
+
+    if (!suggestions.length) {
+      suggestionsBox.style.display = 'none';
+      suggestionsBox.innerHTML = '';
+      return;
+    }
+
+    suggestionsBox.innerHTML = suggestions
+      .map((name) => `<div class="name-suggestion" style="padding:6px;cursor:pointer;">${name}</div>`)
+      .join('');
+    suggestionsBox.style.display = 'block';
+
+    document.querySelectorAll('.name-suggestion').forEach((el) => {
+      el.addEventListener('click', () => {
+        nameInput.value = el.textContent;
+        suggestionsBox.style.display = 'none';
+      });
+    });
+  }
+
+  if (nameInput) {
+    nameInput.addEventListener('input', loadNameSuggestions);
+    nameInput.addEventListener('blur', () => setTimeout(() => { suggestionsBox.style.display = 'none'; }, 150));
+    nameInput.addEventListener('focus', loadNameSuggestions);
   }
 
   document.querySelectorAll('td.editable').forEach((cell) => {

@@ -370,6 +370,24 @@ def ingest_email_workbook(db: Any, file_bytes: bytes, source_name: str) -> tuple
     return updates, approvals, skipped, logs
 
 
+def fetch_name_suggestions(db: Any, q: str, limit: int = 10) -> list[str]:
+    q = q.strip()
+    if len(q) < 3:
+        return []
+    cursor = db.cursor()
+    cursor.execute(
+        """
+        SELECT DISTINCT TOP (?) name
+        FROM dbo.agency_members
+        WHERE name IS NOT NULL AND name LIKE ?
+        ORDER BY name
+        """,
+        limit,
+        f"%{q}%",
+    )
+    return [row[0] for row in cursor.fetchall() if row[0]]
+
+
 def fetch_divisions(db: Any) -> list[str]:
     cursor = db.cursor()
     cursor.execute("SELECT DISTINCT division FROM dbo.agency_members WHERE division IS NOT NULL AND LTRIM(RTRIM(division)) <> '' ORDER BY division")
@@ -377,6 +395,19 @@ def fetch_divisions(db: Any) -> list[str]:
 
 
 
+
+
+
+@app.get("/name-suggestions")
+def name_suggestions():
+    q = request.args.get("q", "")
+    try:
+        db = get_db()
+        names = fetch_name_suggestions(db, q)
+        db.close()
+        return jsonify({"suggestions": names})
+    except Exception as exc:
+        return jsonify({"suggestions": [], "error": str(exc)}), 500
 
 @app.post("/update-cell")
 def update_cell():
