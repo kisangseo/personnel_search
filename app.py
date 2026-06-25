@@ -284,10 +284,10 @@ def fetch_members(db: Any, search_name: str = "", search_division: str = "", sea
         params.append(f"%{search_radio_id}%")
 
     where_sql = f" WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
-    query = "SELECT employee_id, name, email, rank, division, status, badge_number, sequence_num, department_cell, radio_id, race, sex, imported_at FROM dbo.agency_members" + where_sql + " ORDER BY name, employee_id"
+    query = "SELECT employee_id, name, email, rank, division, status, badge_number, sequence_num, department_cell, radio_id, race, sex FROM dbo.agency_members" + where_sql + " ORDER BY name, employee_id"
     cursor.execute(query, params)
     rows = cursor.fetchall()
-    return [{"employee_id": r[0], "name": r[1], "email": r[2], "rank": r[3], "division": r[4], "division_display": display_division(r[4]), "status": r[5], "badge_number": r[6], "sequence_num": r[7], "department_cell": r[8], "radio_id": r[9], "race": r[10], "sex": r[11], "imported_at": r[12]} for r in rows]
+    return [{"employee_id": r[0], "name": r[1], "email": r[2], "rank": r[3], "division": r[4], "division_display": display_division(r[4]), "status": r[5], "badge_number": r[6], "sequence_num": r[7], "department_cell": r[8], "radio_id": r[9], "race": r[10], "sex": r[11]} for r in rows]
 
 
 
