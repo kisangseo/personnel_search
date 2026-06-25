@@ -53,7 +53,48 @@
   {% endif %}
 
   <h2>Agency Members ({{ members|length }})</h2>
-  <table border="1" cellpadding="6" cellspacing="0"><thead><tr><th>Employee ID</th><th>Name</th><th>Email</th><th>Rank</th><th>Division</th><th>Status</th><th>Sequence</th><th>Department Cell</th><th>Radio ID</th><th>Race</th><th>Sex</th><th>Imported At</th></tr></thead><tbody>{% for m in members %}<tr><td>{{ m.employee_id }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="name">{{ m.name or '' }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="email">{{ m.email or '' }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="rank">{{ m.rank or '' }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="division">{{ m.division_display or "" }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="status">{{ m.status or '' }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="sequence_num">{{ m.sequence_num or '' }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="department_cell">{{ m.department_cell or '' }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="radio_id">{{ m.radio_id or '' }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="race">{{ m.race or '' }}</td><td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="sex">{{ m.sex or '' }}</td><td>{{ m.imported_at }}</td></tr>{% else %}<tr><td colspan="12">No records loaded yet.</td></tr>{% endfor %}</tbody></table>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Division</th>
+        <th>Status</th>
+        <th>Department Cell</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in members %}
+        <tr class="member-row" data-employee-id="{{ m.employee_id }}" tabindex="0" aria-expanded="false" style="cursor:pointer;">
+          <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="name">{{ m.name or '' }}</td>
+          <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="email">{{ m.email or '' }}</td>
+          <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="division">{{ m.division_display or "" }}</td>
+          <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="status">{{ m.status or '' }}</td>
+          <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="department_cell">{{ m.department_cell or '' }}</td>
+        </tr>
+        <tr class="member-details" id="details-{{ m.employee_id }}" hidden>
+          <td colspan="5">
+            <dl style="display:grid;grid-template-columns:max-content 1fr max-content 1fr;gap:8px 12px;margin:0;">
+              <dt><strong>Employee ID</strong></dt>
+              <dd style="margin:0;">{{ m.employee_id }}</dd>
+              <dt><strong>Rank</strong></dt>
+              <dd class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="rank" style="margin:0;">{{ m.rank or '' }}</dd>
+              <dt><strong>Sequence</strong></dt>
+              <dd class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="sequence_num" style="margin:0;">{{ m.sequence_num or '' }}</dd>
+              <dt><strong>Radio ID</strong></dt>
+              <dd class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="radio_id" style="margin:0;">{{ m.radio_id or '' }}</dd>
+              <dt><strong>Race</strong></dt>
+              <dd class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="race" style="margin:0;">{{ m.race or '' }}</dd>
+              <dt><strong>Sex</strong></dt>
+              <dd class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="sex" style="margin:0;">{{ m.sex or '' }}</dd>
+            </dl>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5">No records loaded yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
 
 <script>
   async function saveCell(cell) {
@@ -122,7 +163,26 @@
     nameInput.addEventListener('focus', loadNameSuggestions);
   }
 
-  document.querySelectorAll('td.editable').forEach((cell) => {
+  function toggleMemberDetails(row) {
+    const detailsRow = row.nextElementSibling;
+    if (!detailsRow || !detailsRow.classList.contains('member-details')) return;
+
+    const isExpanded = row.getAttribute('aria-expanded') === 'true';
+    detailsRow.hidden = isExpanded;
+    row.setAttribute('aria-expanded', String(!isExpanded));
+  }
+
+  document.querySelectorAll('tr.member-row').forEach((row) => {
+    row.addEventListener('click', () => toggleMemberDetails(row));
+    row.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleMemberDetails(row);
+      }
+    });
+  });
+
+  document.querySelectorAll('.editable').forEach((cell) => {
     cell.dataset.originalValue = cell.innerText.trim();
     cell.addEventListener('blur', () => saveCell(cell));
     cell.addEventListener('keydown', (e) => {
