@@ -71,6 +71,7 @@ EDITABLE_FIELDS = {
     "radio_id",
     "race",
     "sex",
+    "notes",
 }
 
 
@@ -155,6 +156,7 @@ def initialize_database(db: Any) -> None:
         "IF COL_LENGTH('dbo.agency_members','radio_id') IS NULL ALTER TABLE dbo.agency_members ADD radio_id NVARCHAR(50) NULL;",
         "IF COL_LENGTH('dbo.agency_members','race') IS NULL ALTER TABLE dbo.agency_members ADD race NVARCHAR(50) NULL;",
         "IF COL_LENGTH('dbo.agency_members','sex') IS NULL ALTER TABLE dbo.agency_members ADD sex NVARCHAR(20) NULL;",
+        "IF COL_LENGTH('dbo.agency_members','notes') IS NULL ALTER TABLE dbo.agency_members ADD notes NVARCHAR(MAX) NULL;",
     ]:
         cursor.execute(stmt)
     db.commit()
@@ -284,10 +286,10 @@ def fetch_members(db: Any, search_name: str = "", search_division: str = "", sea
         params.append(f"%{search_radio_id}%")
 
     where_sql = f" WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
-    query = "SELECT employee_id, name, email, rank, division, status, badge_number, sequence_num, department_cell, radio_id, race, sex FROM dbo.agency_members" + where_sql + " ORDER BY name, employee_id"
+    query = "SELECT employee_id, name, email, rank, division, status, badge_number, sequence_num, department_cell, radio_id, race, sex, notes FROM dbo.agency_members" + where_sql + " ORDER BY name, employee_id"
     cursor.execute(query, params)
     rows = cursor.fetchall()
-    return [{"employee_id": r[0], "name": r[1], "email": r[2], "rank": r[3], "division": r[4], "division_display": display_division(r[4]), "status": r[5], "badge_number": r[6], "sequence_num": r[7], "department_cell": r[8], "radio_id": r[9], "race": r[10], "sex": r[11]} for r in rows]
+    return [{"employee_id": r[0], "name": r[1], "email": r[2], "rank": r[3], "division": r[4], "division_display": display_division(r[4]), "status": r[5], "badge_number": r[6], "sequence_num": r[7], "department_cell": r[8], "radio_id": r[9], "race": r[10], "sex": r[11], "notes": r[12]} for r in rows]
 
 
 

@@ -3,15 +3,7 @@
 <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Personnel Admin Portal</title></head>
 <body>
   <h1>Personnel Admin Portal</h1>
-  <p>Upload a CSV file to ingest personnel into Azure SQL.</p>
   {% if db_error %}<p><strong>Database connection error:</strong> {{ db_error }}</p>{% endif %}
-  <form method="post" enctype="multipart/form-data">
-    <label>Personnel CSV:</label> <input id="csv_file" name="csv_file" type="file" accept=".csv,text/csv" />
-    <button type="submit">Upload CSV</button>
-    <br/><br/>
-    <label>Email Workbook (.xlsx, all tabs):</label> <input id="email_workbook" name="email_workbook" type="file" accept=".xlsx" />
-    <button type="submit">Upload Email Workbook</button>
-  </form>
   {% if import_result %}<p><strong>{{ import_result }}</strong></p>{% endif %}
 
   <h3>Search</h3>
@@ -61,6 +53,7 @@
         <th>Division</th>
         <th>Status</th>
         <th>Department Cell</th>
+        <th>Notes</th>
       </tr>
     </thead>
     <tbody>
@@ -71,9 +64,10 @@
           <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="division">{{ m.division_display or "" }}</td>
           <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="status">{{ m.status or '' }}</td>
           <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="department_cell">{{ m.department_cell or '' }}</td>
+          <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="notes">{{ m.notes or '' }}</td>
         </tr>
         <tr class="member-details" id="details-{{ m.employee_id }}" hidden>
-          <td colspan="5">
+          <td colspan="6">
             <dl style="display:grid;grid-template-columns:max-content 1fr max-content 1fr;gap:8px 12px;margin:0;">
               <dt><strong>Employee ID</strong></dt>
               <dd style="margin:0;">{{ m.employee_id }}</dd>
@@ -91,7 +85,7 @@
           </td>
         </tr>
       {% else %}
-        <tr><td colspan="5">No records loaded yet.</td></tr>
+        <tr><td colspan="6">No records loaded yet.</td></tr>
       {% endfor %}
     </tbody>
   </table>
