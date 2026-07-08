@@ -44,7 +44,56 @@
 {% endfor %}</pre>
   {% endif %}
 
-  <h2>Agency Members ({{ members|length }})</h2>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <h2>Agency Members ({{ members|length }})</h2>
+    <button type="button" id="add_member_button">Add Member</button>
+  </div>
+
+  <dialog id="add_member_dialog">
+    <form method="post" action="/add-member" style="min-width:420px;">
+      <h3>Add Member</h3>
+      <p>
+        <label>Employee ID<br/><input type="text" name="employee_id" required /></label>
+      </p>
+      <p>
+        <label>Name<br/><input type="text" name="name" /></label>
+      </p>
+      <p>
+        <label>Email<br/><input type="email" name="email" /></label>
+      </p>
+      <p>
+        <label>Division<br/><input type="text" name="division" /></label>
+      </p>
+      <p>
+        <label>Status<br/><input type="text" name="status" /></label>
+      </p>
+      <p>
+        <label>Department Cell<br/><input type="text" name="department_cell" /></label>
+      </p>
+      <p>
+        <label>Notes<br/><textarea name="notes" rows="3"></textarea></label>
+      </p>
+      <p>
+        <label>Rank<br/><input type="text" name="rank" /></label>
+      </p>
+      <p>
+        <label>Sequence<br/><input type="text" name="sequence_num" /></label>
+      </p>
+      <p>
+        <label>Radio ID<br/><input type="text" name="radio_id" /></label>
+      </p>
+      <p>
+        <label>Race<br/><input type="text" name="race" /></label>
+      </p>
+      <p>
+        <label>Sex<br/><input type="text" name="sex" /></label>
+      </p>
+      <menu style="display:flex;gap:8px;justify-content:flex-end;padding:0;">
+        <button type="button" id="cancel_add_member">Cancel</button>
+        <button type="submit">Save Member</button>
+      </menu>
+    </form>
+  </dialog>
   <table border="1" cellpadding="6" cellspacing="0">
     <thead>
       <tr>
@@ -112,6 +161,18 @@
     }
   }
 
+
+  const addMemberDialog = document.getElementById('add_member_dialog');
+  const addMemberButton = document.getElementById('add_member_button');
+  const cancelAddMember = document.getElementById('cancel_add_member');
+
+  if (addMemberDialog && addMemberButton) {
+    addMemberButton.addEventListener('click', () => addMemberDialog.showModal());
+  }
+
+  if (addMemberDialog && cancelAddMember) {
+    cancelAddMember.addEventListener('click', () => addMemberDialog.close());
+  }
 
   const nameInput = document.getElementById('search_name');
   const suggestionsBox = document.getElementById('name_suggestions');

@@ -476,6 +476,55 @@ def approve_guess():
     return redirect(url_for("index"))
 
 
+@app.post("/add-member")
+def add_member():
+    employee_id = request.form.get("employee_id", "").strip()
+    if not employee_id:
+        return redirect(url_for("index"))
+
+    fields = {
+        "name": request.form.get("name", "").strip(),
+        "email": request.form.get("email", "").strip(),
+        "rank": request.form.get("rank", "").strip(),
+        "division": request.form.get("division", "").strip(),
+        "status": request.form.get("status", "").strip(),
+        "sequence_num": request.form.get("sequence_num", "").strip(),
+        "department_cell": request.form.get("department_cell", "").strip(),
+        "radio_id": request.form.get("radio_id", "").strip(),
+        "race": request.form.get("race", "").strip(),
+        "sex": request.form.get("sex", "").strip(),
+        "notes": request.form.get("notes", "").strip(),
+    }
+
+    db = get_db()
+    initialize_database(db)
+    cursor = db.cursor()
+    cursor.execute(
+        """
+        INSERT INTO dbo.agency_members
+        (employee_id, name, email, rank, division, status, sequence_num, department_cell,
+         radio_id, race, sex, notes, source_file, imported_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, SYSUTCDATETIME())
+        """,
+        employee_id,
+        fields["name"],
+        fields["email"],
+        fields["rank"],
+        fields["division"],
+        fields["status"],
+        fields["sequence_num"],
+        fields["department_cell"],
+        fields["radio_id"],
+        fields["race"],
+        fields["sex"],
+        fields["notes"],
+        "manual",
+    )
+    db.commit()
+    db.close()
+    return redirect(url_for("index"))
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     import_result = None
