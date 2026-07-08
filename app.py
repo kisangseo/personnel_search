@@ -46,6 +46,24 @@ DIVISION_GROUPS = {
     "Special Operations": ["Special Operations", "Special_Operations", "SOD"],
 }
 
+DIVISION_OPTIONS = [
+    "Command",
+    "Communications",
+    "Court Security",
+    "Domestic Violence",
+    "Field Services",
+    "Human Resources",
+    "Information Technology",
+    "Internal Affairs",
+    "Neighborhood Services",
+    "Special Operations",
+    "Training",
+    "Others",
+]
+STATUS_OPTIONS = ["Active", "Inactive"]
+RACE_OPTIONS = ["White", "Black", "Asian", "Hispanic", "Other"]
+SEX_OPTIONS = ["Male", "Female", "Other"]
+
 
 def normalize_division_value(value: str) -> str:
     return (value or "").replace("_", " ").strip()
@@ -71,6 +89,7 @@ EDITABLE_FIELDS = {
     "radio_id",
     "race",
     "sex",
+    "notes",
 }
 
 
@@ -155,6 +174,7 @@ def initialize_database(db: Any) -> None:
         "IF COL_LENGTH('dbo.agency_members','radio_id') IS NULL ALTER TABLE dbo.agency_members ADD radio_id NVARCHAR(50) NULL;",
         "IF COL_LENGTH('dbo.agency_members','race') IS NULL ALTER TABLE dbo.agency_members ADD race NVARCHAR(50) NULL;",
         "IF COL_LENGTH('dbo.agency_members','sex') IS NULL ALTER TABLE dbo.agency_members ADD sex NVARCHAR(20) NULL;",
+        "IF COL_LENGTH('dbo.agency_members','notes') IS NULL ALTER TABLE dbo.agency_members ADD notes NVARCHAR(MAX) NULL;",
     ]:
         cursor.execute(stmt)
     db.commit()
@@ -284,10 +304,10 @@ def fetch_members(db: Any, search_name: str = "", search_division: str = "", sea
         params.append(f"%{search_radio_id}%")
 
     where_sql = f" WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
-    query = "SELECT employee_id, name, email, rank, division, status, badge_number, sequence_num, department_cell, radio_id, race, sex FROM dbo.agency_members" + where_sql + " ORDER BY name, employee_id"
+    query = "SELECT employee_id, name, email, rank, division, status, badge_number, sequence_num, department_cell, radio_id, race, sex, notes FROM dbo.agency_members" + where_sql + " ORDER BY name, employee_id"
     cursor.execute(query, params)
     rows = cursor.fetchall()
-    return [{"employee_id": r[0], "name": r[1], "email": r[2], "rank": r[3], "division": r[4], "division_display": display_division(r[4]), "status": r[5], "badge_number": r[6], "sequence_num": r[7], "department_cell": r[8], "radio_id": r[9], "race": r[10], "sex": r[11]} for r in rows]
+    return [{"employee_id": r[0], "name": r[1], "email": r[2], "rank": r[3], "division": r[4], "division_display": display_division(r[4]), "status": r[5], "badge_number": r[6], "sequence_num": r[7], "department_cell": r[8], "radio_id": r[9], "race": r[10], "sex": r[11], "notes": r[12]} for r in rows]
 
 
 
@@ -417,6 +437,20 @@ def fetch_name_suggestions(db: Any, q: str, limit: int = 10) -> list[str]:
     return [row[0] for row in cursor.fetchall() if row[0]]
 
 
+
+def fetch_rank_options(db: Any) -> list[str]:
+    cursor = db.cursor()
+    cursor.execute(
+        """
+        SELECT DISTINCT rank
+        FROM dbo.agency_members
+        WHERE rank IS NOT NULL AND LTRIM(RTRIM(rank)) <> ''
+        ORDER BY rank
+        """
+    )
+    ranks = [str(row[0]).strip() for row in cursor.fetchall() if str(row[0]).strip()]
+    return [rank for rank in ranks if rank != "Others"] + ["Others"]
+
 def fetch_divisions(db: Any) -> list[str]:
     cursor = db.cursor()
     cursor.execute("SELECT DISTINCT division FROM dbo.agency_members WHERE division IS NOT NULL AND LTRIM(RTRIM(division)) <> '' ORDER BY division")
@@ -474,12 +508,62 @@ def approve_guess():
     return redirect(url_for("index"))
 
 
+@app.post("/add-member")
+def add_member():
+    employee_id = request.form.get("employee_id", "").strip()
+    if not employee_id:
+        return redirect(url_for("index"))
+
+    fields = {
+        "name": request.form.get("name", "").strip(),
+        "email": request.form.get("email", "").strip(),
+        "rank": request.form.get("rank", "").strip(),
+        "division": request.form.get("division", "").strip(),
+        "status": request.form.get("status", "").strip(),
+        "sequence_num": request.form.get("sequence_num", "").strip(),
+        "department_cell": request.form.get("department_cell", "").strip(),
+        "radio_id": request.form.get("radio_id", "").strip(),
+        "race": request.form.get("race", "").strip(),
+        "sex": request.form.get("sex", "").strip(),
+        "notes": request.form.get("notes", "").strip(),
+    }
+
+    db = get_db()
+    initialize_database(db)
+    cursor = db.cursor()
+    cursor.execute(
+        """
+        INSERT INTO dbo.agency_members
+        (employee_id, name, email, rank, division, status, sequence_num, department_cell,
+         radio_id, race, sex, notes, source_file, imported_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, SYSUTCDATETIME())
+        """,
+        employee_id,
+        fields["name"],
+        fields["email"],
+        fields["rank"],
+        fields["division"],
+        fields["status"],
+        fields["sequence_num"],
+        fields["department_cell"],
+        fields["radio_id"],
+        fields["race"],
+        fields["sex"],
+        fields["notes"],
+        "manual",
+    )
+    db.commit()
+    db.close()
+    return redirect(url_for("index"))
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     import_result = None
     db_error = None
     members = []
     divisions: list[str] = []
+    rank_options: list[str] = ["Others"]
     ingest_logs: list[str] = []
 
     search_name = request.values.get("search_name", "").strip()
@@ -503,11 +587,12 @@ def index():
                 import_result = "Please choose a CSV file or Email Workbook before clicking upload."
         members = fetch_members(db, search_name=search_name, search_division=search_division, search_radio_id=search_radio_id)
         divisions = fetch_divisions(db)
+        rank_options = fetch_rank_options(db)
         db.close()
     except Exception as exc:
         db_error = str(exc)
 
-    return render_template("index.html", members=members, import_result=import_result, db_error=db_error, ingest_logs=ingest_logs, pending_approvals=PENDING_APPROVALS, divisions=divisions, search_name=search_name, search_division=search_division, search_radio_id=search_radio_id)
+    return render_template("index.html", members=members, import_result=import_result, db_error=db_error, ingest_logs=ingest_logs, pending_approvals=PENDING_APPROVALS, divisions=divisions, division_options=DIVISION_OPTIONS, status_options=STATUS_OPTIONS, rank_options=rank_options, race_options=RACE_OPTIONS, sex_options=SEX_OPTIONS, search_name=search_name, search_division=search_division, search_radio_id=search_radio_id)
 
 
 if __name__ == "__main__":
