@@ -46,6 +46,24 @@ DIVISION_GROUPS = {
     "Special Operations": ["Special Operations", "Special_Operations", "SOD"],
 }
 
+DIVISION_OPTIONS = [
+    "Command",
+    "Communications",
+    "Court Security",
+    "Domestic Violence",
+    "Field Services",
+    "Human Resources",
+    "Information Technology",
+    "Internal Affairs",
+    "Neighborhood Services",
+    "Special Operations",
+    "Training",
+    "Others",
+]
+STATUS_OPTIONS = ["Active", "Inactive"]
+RACE_OPTIONS = ["White", "Black", "Asian", "Hispanic", "Other"]
+SEX_OPTIONS = ["Male", "Female", "Other"]
+
 
 def normalize_division_value(value: str) -> str:
     return (value or "").replace("_", " ").strip()
@@ -419,6 +437,20 @@ def fetch_name_suggestions(db: Any, q: str, limit: int = 10) -> list[str]:
     return [row[0] for row in cursor.fetchall() if row[0]]
 
 
+
+def fetch_rank_options(db: Any) -> list[str]:
+    cursor = db.cursor()
+    cursor.execute(
+        """
+        SELECT DISTINCT rank
+        FROM dbo.agency_members
+        WHERE rank IS NOT NULL AND LTRIM(RTRIM(rank)) <> ''
+        ORDER BY rank
+        """
+    )
+    ranks = [str(row[0]).strip() for row in cursor.fetchall() if str(row[0]).strip()]
+    return [rank for rank in ranks if rank != "Others"] + ["Others"]
+
 def fetch_divisions(db: Any) -> list[str]:
     cursor = db.cursor()
     cursor.execute("SELECT DISTINCT division FROM dbo.agency_members WHERE division IS NOT NULL AND LTRIM(RTRIM(division)) <> '' ORDER BY division")
@@ -531,6 +563,7 @@ def index():
     db_error = None
     members = []
     divisions: list[str] = []
+    rank_options: list[str] = ["Others"]
     ingest_logs: list[str] = []
 
     search_name = request.values.get("search_name", "").strip()
@@ -554,11 +587,12 @@ def index():
                 import_result = "Please choose a CSV file or Email Workbook before clicking upload."
         members = fetch_members(db, search_name=search_name, search_division=search_division, search_radio_id=search_radio_id)
         divisions = fetch_divisions(db)
+        rank_options = fetch_rank_options(db)
         db.close()
     except Exception as exc:
         db_error = str(exc)
 
-    return render_template("index.html", members=members, import_result=import_result, db_error=db_error, ingest_logs=ingest_logs, pending_approvals=PENDING_APPROVALS, divisions=divisions, search_name=search_name, search_division=search_division, search_radio_id=search_radio_id)
+    return render_template("index.html", members=members, import_result=import_result, db_error=db_error, ingest_logs=ingest_logs, pending_approvals=PENDING_APPROVALS, divisions=divisions, division_options=DIVISION_OPTIONS, status_options=STATUS_OPTIONS, rank_options=rank_options, race_options=RACE_OPTIONS, sex_options=SEX_OPTIONS, search_name=search_name, search_division=search_division, search_radio_id=search_radio_id)
 
 
 if __name__ == "__main__":
