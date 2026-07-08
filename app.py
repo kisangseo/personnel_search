@@ -71,6 +71,7 @@ EDITABLE_FIELDS = {
     "radio_id",
     "race",
     "sex",
+    "notes",
 }
 
 
@@ -155,6 +156,7 @@ def initialize_database(db: Any) -> None:
         "IF COL_LENGTH('dbo.agency_members','radio_id') IS NULL ALTER TABLE dbo.agency_members ADD radio_id NVARCHAR(50) NULL;",
         "IF COL_LENGTH('dbo.agency_members','race') IS NULL ALTER TABLE dbo.agency_members ADD race NVARCHAR(50) NULL;",
         "IF COL_LENGTH('dbo.agency_members','sex') IS NULL ALTER TABLE dbo.agency_members ADD sex NVARCHAR(20) NULL;",
+        "IF COL_LENGTH('dbo.agency_members','notes') IS NULL ALTER TABLE dbo.agency_members ADD notes NVARCHAR(MAX) NULL;",
     ]:
         cursor.execute(stmt)
     db.commit()
@@ -284,10 +286,10 @@ def fetch_members(db: Any, search_name: str = "", search_division: str = "", sea
         params.append(f"%{search_radio_id}%")
 
     where_sql = f" WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
-    query = "SELECT employee_id, name, email, rank, division, status, badge_number, sequence_num, department_cell, radio_id, race, sex FROM dbo.agency_members" + where_sql + " ORDER BY name, employee_id"
+    query = "SELECT employee_id, name, email, rank, division, status, badge_number, sequence_num, department_cell, radio_id, race, sex, notes FROM dbo.agency_members" + where_sql + " ORDER BY name, employee_id"
     cursor.execute(query, params)
     rows = cursor.fetchall()
-    return [{"employee_id": r[0], "name": r[1], "email": r[2], "rank": r[3], "division": r[4], "division_display": display_division(r[4]), "status": r[5], "badge_number": r[6], "sequence_num": r[7], "department_cell": r[8], "radio_id": r[9], "race": r[10], "sex": r[11]} for r in rows]
+    return [{"employee_id": r[0], "name": r[1], "email": r[2], "rank": r[3], "division": r[4], "division_display": display_division(r[4]), "status": r[5], "badge_number": r[6], "sequence_num": r[7], "department_cell": r[8], "radio_id": r[9], "race": r[10], "sex": r[11], "notes": r[12]} for r in rows]
 
 
 
@@ -471,6 +473,55 @@ def approve_guess():
         _update_member(cursor, payload, payload["employee_id"])
         db.commit()
         db.close()
+    return redirect(url_for("index"))
+
+
+@app.post("/add-member")
+def add_member():
+    employee_id = request.form.get("employee_id", "").strip()
+    if not employee_id:
+        return redirect(url_for("index"))
+
+    fields = {
+        "name": request.form.get("name", "").strip(),
+        "email": request.form.get("email", "").strip(),
+        "rank": request.form.get("rank", "").strip(),
+        "division": request.form.get("division", "").strip(),
+        "status": request.form.get("status", "").strip(),
+        "sequence_num": request.form.get("sequence_num", "").strip(),
+        "department_cell": request.form.get("department_cell", "").strip(),
+        "radio_id": request.form.get("radio_id", "").strip(),
+        "race": request.form.get("race", "").strip(),
+        "sex": request.form.get("sex", "").strip(),
+        "notes": request.form.get("notes", "").strip(),
+    }
+
+    db = get_db()
+    initialize_database(db)
+    cursor = db.cursor()
+    cursor.execute(
+        """
+        INSERT INTO dbo.agency_members
+        (employee_id, name, email, rank, division, status, sequence_num, department_cell,
+         radio_id, race, sex, notes, source_file, imported_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, SYSUTCDATETIME())
+        """,
+        employee_id,
+        fields["name"],
+        fields["email"],
+        fields["rank"],
+        fields["division"],
+        fields["status"],
+        fields["sequence_num"],
+        fields["department_cell"],
+        fields["radio_id"],
+        fields["race"],
+        fields["sex"],
+        fields["notes"],
+        "manual",
+    )
+    db.commit()
+    db.close()
     return redirect(url_for("index"))
 
 

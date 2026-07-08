@@ -3,15 +3,7 @@
 <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Personnel Admin Portal</title></head>
 <body>
   <h1>Personnel Admin Portal</h1>
-  <p>Upload a CSV file to ingest personnel into Azure SQL.</p>
   {% if db_error %}<p><strong>Database connection error:</strong> {{ db_error }}</p>{% endif %}
-  <form method="post" enctype="multipart/form-data">
-    <label>Personnel CSV:</label> <input id="csv_file" name="csv_file" type="file" accept=".csv,text/csv" />
-    <button type="submit">Upload CSV</button>
-    <br/><br/>
-    <label>Email Workbook (.xlsx, all tabs):</label> <input id="email_workbook" name="email_workbook" type="file" accept=".xlsx" />
-    <button type="submit">Upload Email Workbook</button>
-  </form>
   {% if import_result %}<p><strong>{{ import_result }}</strong></p>{% endif %}
 
   <h3>Search</h3>
@@ -52,7 +44,56 @@
 {% endfor %}</pre>
   {% endif %}
 
-  <h2>Agency Members ({{ members|length }})</h2>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <h2>Agency Members ({{ members|length }})</h2>
+    <button type="button" id="add_member_button">Add Member</button>
+  </div>
+
+  <dialog id="add_member_dialog">
+    <form method="post" action="/add-member" style="min-width:420px;">
+      <h3>Add Member</h3>
+      <p>
+        <label>Employee ID<br/><input type="text" name="employee_id" required /></label>
+      </p>
+      <p>
+        <label>Name<br/><input type="text" name="name" /></label>
+      </p>
+      <p>
+        <label>Email<br/><input type="email" name="email" /></label>
+      </p>
+      <p>
+        <label>Division<br/><input type="text" name="division" /></label>
+      </p>
+      <p>
+        <label>Status<br/><input type="text" name="status" /></label>
+      </p>
+      <p>
+        <label>Department Cell<br/><input type="text" name="department_cell" /></label>
+      </p>
+      <p>
+        <label>Notes<br/><textarea name="notes" rows="3"></textarea></label>
+      </p>
+      <p>
+        <label>Rank<br/><input type="text" name="rank" /></label>
+      </p>
+      <p>
+        <label>Sequence<br/><input type="text" name="sequence_num" /></label>
+      </p>
+      <p>
+        <label>Radio ID<br/><input type="text" name="radio_id" /></label>
+      </p>
+      <p>
+        <label>Race<br/><input type="text" name="race" /></label>
+      </p>
+      <p>
+        <label>Sex<br/><input type="text" name="sex" /></label>
+      </p>
+      <menu style="display:flex;gap:8px;justify-content:flex-end;padding:0;">
+        <button type="button" id="cancel_add_member">Cancel</button>
+        <button type="submit">Save Member</button>
+      </menu>
+    </form>
+  </dialog>
   <table border="1" cellpadding="6" cellspacing="0">
     <thead>
       <tr>
@@ -61,6 +102,7 @@
         <th>Division</th>
         <th>Status</th>
         <th>Department Cell</th>
+        <th>Notes</th>
       </tr>
     </thead>
     <tbody>
@@ -71,9 +113,10 @@
           <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="division">{{ m.division_display or "" }}</td>
           <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="status">{{ m.status or '' }}</td>
           <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="department_cell">{{ m.department_cell or '' }}</td>
+          <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="notes">{{ m.notes or '' }}</td>
         </tr>
         <tr class="member-details" id="details-{{ m.employee_id }}" hidden>
-          <td colspan="5">
+          <td colspan="6">
             <dl style="display:grid;grid-template-columns:max-content 1fr max-content 1fr;gap:8px 12px;margin:0;">
               <dt><strong>Employee ID</strong></dt>
               <dd style="margin:0;">{{ m.employee_id }}</dd>
@@ -91,7 +134,7 @@
           </td>
         </tr>
       {% else %}
-        <tr><td colspan="5">No records loaded yet.</td></tr>
+        <tr><td colspan="6">No records loaded yet.</td></tr>
       {% endfor %}
     </tbody>
   </table>
@@ -118,6 +161,18 @@
     }
   }
 
+
+  const addMemberDialog = document.getElementById('add_member_dialog');
+  const addMemberButton = document.getElementById('add_member_button');
+  const cancelAddMember = document.getElementById('cancel_add_member');
+
+  if (addMemberDialog && addMemberButton) {
+    addMemberButton.addEventListener('click', () => addMemberDialog.showModal());
+  }
+
+  if (addMemberDialog && cancelAddMember) {
+    cancelAddMember.addEventListener('click', () => addMemberDialog.close());
+  }
 
   const nameInput = document.getElementById('search_name');
   const suggestionsBox = document.getElementById('name_suggestions');
