@@ -160,3 +160,11 @@ details > .table-scroll { margin-top: .4rem; }
 .page-heading h1 { margin-bottom: 0; }
 .member-status { display: inline-block; padding: .22rem .54rem; border-radius: 1rem; background: #edf0f5; color: #415470; }
 .member-status[data-status="Active"] { background: #e3f6ec; color: #166245; }
+
+.catalog-caption { margin-block: .5rem .85rem; color: var(--muted); }
+.catalog-filter { margin-bottom: .85rem; }
+.catalog-group { border-top: 1px solid var(--line); }
+.catalog-group > summary { padding: .65rem .2rem; font-weight: 650; white-space: normal; }
+.catalog-group > summary span, .catalog-group small { color: var(--muted); font-weight: 400; }
+.catalog-group td:first-child { width: 42%; font-weight: 650; }
+.catalog-group th { white-space: normal; }
