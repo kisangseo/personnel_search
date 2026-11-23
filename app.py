@@ -756,16 +756,19 @@ def inventory_page():
         for entry in entries
         if entry["returned_at"] is None
     }
+    workbook_issued = {device_id for device_id, details in imported_details.items()
+                       if details["workbook_assignees"] and not details["inactive"]}
     available_devices = [
         device for device in devices if device.device_id not in active_assignments
+        and device.device_id not in workbook_issued
         and not imported_details.get(device.device_id, {}).get("inactive")
     ]
-    stock_count = sum(not imported_details.get(device.device_id, {}).get("needs_review") for device in available_devices)
-    messages = {"added": "Device added.", "issued": "Device issued.", "returned": "Device returned."}
+    stock_count = len(available_devices)
+    messages = {"added": "Device added.", "issued": "Device issued.", "returned": "Device returned.", "reassigned": "Assignment changed."}
     return render_template(
         "inventory.html", area=area, areas=inventory.AREAS, devices=devices, roster=roster, history=history,
         active_assignments=active_assignments, available_devices=available_devices,
-        issued_count=len(active_assignments), stock_count=stock_count, imported_details=imported_details,
+        issued_count=len(active_assignments.keys() | workbook_issued), stock_count=stock_count, imported_details=imported_details,
         import_summary=request.args.get("import_summary"), message=messages.get(request.args.get("result")),
         catalog=catalog, catalog_items=catalog_items, catalog_categories=catalog_categories,
         catalog_query=catalog_query, catalog_category=catalog_category,
@@ -847,14 +850,14 @@ def import_technology_inventory():
     except pyodbc.Error:
         app.logger.exception("Technology Center inventory import failed")
         return render_template("inventory.html", area=area, areas=inventory.AREAS, error="The import could not be saved."), 503
-    summary = "{added} added · {linked} linked to personnel · {review} need review · {skipped} already in inventory".format(**counts)
+    summary = "{added} added · {linked} linked to personnel · {review} assigned by workbook name · {skipped} already in inventory".format(**counts)
     return redirect(url_for("inventory_page", area=area, import_summary=summary), code=303)
 
 
 @app.post("/inventory/<action>")
 def change_inventory(action):
     area = selected_inventory_area()
-    if action not in {"add", "issue", "return"}:
+    if action not in {"add", "issue", "return", "reassign"}:
         abort(404)
     if request.headers.get("Sec-Fetch-Site") == "cross-site":
         abort(403)
@@ -872,11 +875,16 @@ def change_inventory(action):
                 device_id = request.form.get("device_id", type=int)
                 if not device_id or not 0 < device_id <= 2147483647:
                     raise ValueError("Select a valid device.")
-                if action == "issue":
+                if action in {"issue", "reassign"}:
                     recipient_id = request.form.get("recipient_id", "").strip()
                     issuer_id = request.form.get("issuer_id", "").strip()
                     if not recipient_id or not issuer_id or max(len(recipient_id), len(issuer_id)) > 50:
                         raise ValueError("Select a valid recipient and issuer from the personnel roster.")
+                    if action == "reassign" and request.form.get("assignment_id"):
+                        assignment_id = request.form.get("assignment_id", type=int)
+                        if not assignment_id or not 0 < assignment_id <= 2147483647:
+                            raise ValueError("Select a valid assignment.")
+                        inventory.return_device(db, area, device_id, assignment_id)
                     inventory.issue_device(db, area, device_id, recipient_id, issuer_id)
                 else:
                     assignment_id = request.form.get("assignment_id", type=int)
@@ -891,13 +899,14 @@ def change_inventory(action):
             "add": "A device with that serial number already exists in this inventory.",
             "issue": "This device is already issued or the personnel record is unavailable.",
             "return": "The return could not be recorded.",
+            "reassign": "The assignment changed or the personnel record is unavailable.",
         }[action]
         return render_template("inventory.html", area=area, areas=inventory.AREAS, error=message), 409
     except pyodbc.Error:
         app.logger.exception("Could not update inventory")
         return render_template("inventory.html", area=area, areas=inventory.AREAS, error="The inventory update could not be completed."), 503
 
-    result = {"add": "added", "issue": "issued", "return": "returned"}[action]
+    result = {"add": "added", "issue": "issued", "return": "returned", "reassign": "reassigned"}[action]
     return redirect(url_for("inventory_page", area=area, result=result), code=303)
 
 

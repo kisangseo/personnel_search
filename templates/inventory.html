@@ -33,7 +33,7 @@
           <label>Excel workbook <input type="file" name="inventory_workbook" accept=".xlsx" required></label>
           <button class="primary" type="submit">Import devices</button>
         </form>
-        <p class="catalog-caption">Existing serial numbers are skipped. Review flagged assignments before issuing those devices.</p>
+        <p class="catalog-caption">Existing serial numbers are skipped.</p>
       </section>
     {% endif %}
     <div class="inventory-actions">
@@ -56,7 +56,7 @@
             <select name="device_id" required>
               <option value="">Select a device</option>
               {% for device in available_devices %}
-                <option value="{{ device.device_id }}">{{ device.device_name }} ({{ device.serial_number }}){% if imported_details.get(device.device_id, {}).get("needs_review") %} · Review assignment{% endif %}</option>
+                <option value="{{ device.device_id }}">{{ device.device_name }} ({{ device.serial_number }})</option>
               {% endfor %}
             </select>
           </label>
@@ -102,6 +102,7 @@
               {% set entries = history.get(device.device_id, []) %}
               {% set current = active_assignments.get(device.device_id) %}
               {% set imported = imported_details.get(device.device_id) %}
+              {% set workbook_assignees = imported.workbook_assignees if imported and not imported.inactive else [] %}
               {% set last_return = entries|selectattr('return_date')|map(attribute='return_date')|max if entries|selectattr('return_date')|list else none %}
               <tr>
                 <td>
@@ -122,10 +123,10 @@
                 <td>
                   {% if current %}<span class="stock-status issued">Issued</span>
                   {% elif imported and imported.inactive %}<span class="stock-status inactive">Inactive</span>
-                  {% elif imported and imported.needs_review %}<span class="stock-status issued">Review assignment</span>
+                  {% elif workbook_assignees %}<span class="stock-status issued">Issued</span>
                   {% else %}<span class="stock-status">In stock</span>{% endif %}
                 </td>
-                <td>{{ (current.recipient or current.employee_id) if current else '—' }}</td>
+                <td>{{ (current.recipient or current.employee_id) if current else (workbook_assignees|join(', ') or '—') }}</td>
                 <td>{{ last_return or '—' }}</td>
                 <td>
                   {% if entries %}
@@ -144,7 +145,30 @@
                       <input type="hidden" name="assignment_id" value="{{ current.assignment_id }}">
                       <button type="submit" aria-label="Return {{ device.device_name }} ({{ device.serial_number }})">Return</button>
                     </form>
-                  {% else %}—{% endif %}
+                  {% endif %}
+                  {% if (current or workbook_assignees) and roster %}
+                    <details>
+                      <summary>Change assignment</summary>
+                      <form class="form-row" method="post" action="{{ url_for('change_inventory', action='reassign', area=area) }}">
+                        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                        <input type="hidden" name="device_id" value="{{ device.device_id }}">
+                        {% if current %}<input type="hidden" name="assignment_id" value="{{ current.assignment_id }}">{% endif %}
+                        {% for field, label in [('recipient_id', 'New assignee'), ('issuer_id', 'Issued by')] %}
+                          <label>{{ label }}
+                            <select name="{{ field }}" required>
+                              <option value="">Select a staff member</option>
+                              {% for member in roster %}
+                                {% if field != 'recipient_id' or not current or member.employee_id != current.employee_id %}
+                                  <option value="{{ member.employee_id }}">{{ member.name }} ({{ member.employee_id }})</option>
+                                {% endif %}
+                              {% endfor %}
+                            </select>
+                          </label>
+                        {% endfor %}
+                        <button class="primary" type="submit">Save assignment</button>
+                      </form>
+                    </details>
+                  {% endif %}
                 </td>
                 {% endif %}
               </tr>
