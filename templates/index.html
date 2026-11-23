@@ -33,13 +33,14 @@
   </form>
   </section>
 
-  {% if pending_approvals and pending_approvals|length > 0 %}
+  {% if can_edit and pending_approvals and pending_approvals|length > 0 %}
   <h3>Fuzzy Match Approvals</h3>
   <ul>
     {% for approval_id, item in pending_approvals.items() %}
       <li>
         No exact match for <strong>{{ item.name }}</strong>. Suggested match: <strong>{{ item.suggested_name }}</strong> (employee_id <strong>{{ item.employee_id }}</strong>, score {{ item.score }}).
         <form method="post" action="/approve" style="display:inline;">
+          <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
           <input type="hidden" name="approval_id" value="{{ approval_id }}" />
           <button type="submit">Approve</button>
         </form>
@@ -57,11 +58,13 @@
   <section class="panel table-panel">
   <div class="section-head">
     <h2>Agency Members ({{ members|length }})</h2>
-    <button class="primary" type="button" id="add_member_button">Add Member</button>
+    {% if can_edit %}<button class="primary" type="button" id="add_member_button">Add Member</button>{% endif %}
   </div>
 
+  {% if can_edit %}
   <dialog id="add_member_dialog">
     <form method="post" action="/add-member">
+      <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
       <h2>Add Member</h2>
       <div class="dialog-fields">
       <p>
@@ -107,6 +110,7 @@
       </menu>
     </form>
   </dialog>
+  {% endif %}
   <div class="table-scroll">
   <table class="member-table">
     <thead>
@@ -126,12 +130,12 @@
           <td class="disclosure-cell">
             <button class="disclosure" type="button" aria-expanded="false" aria-controls="details-{{ m.employee_id }}" aria-label="Details for {{ m.name or m.employee_id }}"></button>
           </td>
-          <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="name">{{ m.name or '' }}</td>
-          <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="email">{{ m.email or '' }}</td>
-          <td><select class="editable" data-employee-id="{{ m.employee_id }}" data-field="division">{{ field_options(division_options, m.division_display or "") }}</select></td>
-          <td><select class="editable" data-employee-id="{{ m.employee_id }}" data-field="status" data-status="{{ m.status or '' }}">{{ field_options(status_options, m.status or "") }}</select></td>
-          <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="department_cell">{{ m.department_cell or '' }}</td>
-          <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="notes">{{ m.notes or '' }}</td>
+          <td data-field="name">{{ m.name or '' }}</td>
+          <td data-field="email">{{ m.email or '' }}</td>
+          <td>{{ m.division_display or "" }}</td>
+          <td>{% if m.status %}<span class="member-status" data-status="{{ m.status }}">{{ m.status }}</span>{% endif %}</td>
+          <td data-field="department_cell">{{ m.department_cell or '' }}</td>
+          <td data-field="notes">{{ m.notes or '' }}</td>
         </tr>
         <tr class="member-details" id="details-{{ m.employee_id }}" hidden>
           <td colspan="7">
@@ -139,16 +143,19 @@
               <dt><strong>Employee ID</strong></dt>
               <dd>{{ m.employee_id }}</dd>
               <dt><strong>Rank</strong></dt>
-              <dd><select class="editable" data-employee-id="{{ m.employee_id }}" data-field="rank">{{ field_options(rank_options, m.rank or "") }}</select></dd>
+              <dd>{{ m.rank or "" }}</dd>
               <dt><strong>Sequence</strong></dt>
-              <dd class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="sequence_num">{{ m.sequence_num or '' }}</dd>
+              <dd>{{ m.sequence_num or '' }}</dd>
               <dt><strong>Radio ID</strong></dt>
-              <dd class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="radio_id">{{ m.radio_id or '' }}</dd>
+              <dd>{{ m.radio_id or '' }}</dd>
               <dt><strong>Race</strong></dt>
-              <dd><select class="editable" data-employee-id="{{ m.employee_id }}" data-field="race">{{ field_options(race_options, m.race or "") }}</select></dd>
+              <dd>{{ m.race or "" }}</dd>
               <dt><strong>Sex</strong></dt>
-              <dd><select class="editable" data-employee-id="{{ m.employee_id }}" data-field="sex">{{ field_options(sex_options, m.sex or "") }}</select></dd>
+              <dd>{{ m.sex or "" }}</dd>
             </dl>
+            {% if can_edit %}
+              <p><a class="button" href="{{ url_for('edit_member', employee_id=m.employee_id) }}">Edit</a></p>
+            {% endif %}
             <h3>Issued equipment</h3>
             {% if equipment_history is none %}
               <p>Equipment history is temporarily unavailable.</p>
@@ -166,40 +173,6 @@
   </section>
 
 <script>
-  function getEditableValue(cell) {
-    return cell.tagName === 'SELECT' ? cell.value.trim() : cell.innerText.trim();
-  }
-
-  function setEditableValue(cell, value) {
-    if (cell.tagName === 'SELECT') {
-      cell.value = value;
-    } else {
-      cell.innerText = value;
-    }
-  }
-
-  async function saveCell(cell) {
-    const employeeId = cell.dataset.employeeId;
-    const field = cell.dataset.field;
-    const value = getEditableValue(cell);
-    const oldValue = cell.dataset.originalValue ?? '';
-    if (value === oldValue) return;
-
-    const res = await fetch('/update-cell', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({employee_id: employeeId, field, value})
-    });
-
-    if (res.ok) {
-      cell.dataset.originalValue = value;
-    } else {
-      alert('Failed to save cell.');
-      setEditableValue(cell, oldValue);
-    }
-  }
-
-
   const addMemberDialog = document.getElementById('add_member_dialog');
   const addMemberButton = document.getElementById('add_member_button');
   const cancelAddMember = document.getElementById('cancel_add_member');
@@ -267,24 +240,6 @@
     });
   });
 
-  document.querySelectorAll('.editable').forEach((cell) => {
-    cell.dataset.originalValue = getEditableValue(cell);
-    cell.addEventListener('click', (e) => e.stopPropagation());
-    if (cell.tagName === 'SELECT') {
-      cell.addEventListener('change', async () => {
-        await saveCell(cell);
-        if (cell.dataset.field === 'status') cell.dataset.status = cell.value;
-      });
-    } else {
-      cell.addEventListener('blur', () => saveCell(cell));
-    }
-    cell.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        cell.blur();
-      }
-    });
-  });
 </script>
 
 {% endblock %}

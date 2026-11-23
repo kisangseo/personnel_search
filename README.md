@@ -73,3 +73,18 @@ You can upload an `.xlsx` workbook that has many tabs.
 - Rows with detectable email addresses are matched to members by normalized/fuzzy name logic.
 - Exact name matches auto-update `email` and `division`.
 - Fuzzy matches are queued into the existing approval workflow.
+
+## Personnel Portal sign-in
+
+Set `PERSONNEL_SESSION_SECRET` in Azure App Service before deploying. Use a stable,
+random value generated with `python -c "import secrets; print(secrets.token_urlsafe(48))"`.
+The portal requires HTTPS for its session cookie.
+
+Sign-in uses existing BCSO Search Portal accounts in `search.users`. The Personnel
+database connection must have SELECT access to that table. If the account table uses
+a different database or SQL identity, set `PERSONNEL_AUTH_CONNECTION_STRING` to
+a connection with SELECT access. Password changes remain in the Search Portal.
+
+Active accounts can view Personnel and Inventory. Only accounts with `admin`
+or `edit` permission can save changes. Open a personnel record and select **Edit**
+to change its fields, or select **Edit inventory** to manage devices.

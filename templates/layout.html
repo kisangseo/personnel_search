@@ -13,10 +13,16 @@
         <span class="brand-mark" aria-hidden="true">BC</span>
         <span>Baltimore City Sheriff’s Office<small>Personnel Admin Portal</small></span>
       </a>
+      {% if account %}
       <nav class="site-nav" aria-label="Portal">
         <a href="{{ url_for('index') }}"{% if request.endpoint == 'index' %} aria-current="page"{% endif %}>Personnel</a>
         <a href="{{ url_for('inventory_page') }}"{% if request.endpoint in ['inventory_page', 'change_inventory'] %} aria-current="page"{% endif %}>Inventory</a>
+        <form method="post" action="{{ url_for('logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+          <button type="submit">Sign out</button>
+        </form>
       </nav>
+      {% endif %}
     </div>
   </header>
   <main class="page-width">
