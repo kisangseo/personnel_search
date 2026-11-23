@@ -1,4 +1,7 @@
 import csv
+import hmac
+import secrets
+from datetime import timedelta
 import io
 import os
 import re
@@ -9,7 +12,7 @@ from typing import Any
 
 import openpyxl
 import pyodbc
-from flask import Flask, abort, jsonify, redirect, render_template, request, url_for
+from flask import Flask, abort, g, jsonify, redirect, render_template, request, session, url_for
 
 import inventory
 
@@ -21,6 +24,115 @@ if not SQL_SERVER_CONN_STR:
     )
 
 app = Flask(__name__)
+app.config.update(
+    SECRET_KEY=os.getenv("PERSONNEL_SESSION_SECRET"),
+    SESSION_COOKIE_NAME="personnel_session",
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=8),
+    SESSION_REFRESH_EACH_REQUEST=False,
+)
+AUTH_CONNECTION_STRING = os.getenv("PERSONNEL_AUTH_CONNECTION_STRING") or SQL_SERVER_CONN_STR
+SEARCH_PORTAL_URL = "https://bcso-cvdb-dwbnfmcjggf2f2a0.centralus-01.azurewebsites.net"
+
+
+@app.before_request
+def require_portal_access():
+    if request.endpoint in (None, "static"):
+        return
+    if not app.secret_key:
+        abort(503, "Personnel sign-in is unavailable.")
+
+    if request.method == "POST":
+        token = session.get("csrf_token")
+        submitted = request.form.get("csrf_token", "")
+        if not token or not hmac.compare_digest(token.encode(), submitted.encode()):
+            abort(403)
+
+    if request.endpoint == "login":
+        return
+
+    if "user_id" in session:
+        try:
+            with closing(pyodbc.connect(AUTH_CONNECTION_STRING)) as db:
+                g.account = db.cursor().execute("""
+                    SELECT email, permission, must_change_password
+                    FROM search.users WHERE user_id = ? AND is_active = 1
+                """, session["user_id"]).fetchone()
+        except pyodbc.Error:
+            app.logger.exception("Could not verify the Personnel Portal account")
+            abort(503, "Personnel sign-in is unavailable.")
+        if g.account and not g.account.must_change_password:
+            if request.method == "POST" or request.endpoint == "edit_member":
+                if request.endpoint != "logout" and not can_edit():
+                    abort(403)
+            return
+        session.clear()
+
+    if request.method != "GET" or request.endpoint == "name_suggestions":
+        abort(401)
+    return redirect(url_for("login"))
+
+
+def can_edit():
+    account = g.get("account")
+    return bool(account and (account.permission or "").strip().lower() in {"admin", "edit"})
+
+
+@app.context_processor
+def portal_permissions():
+    return {"can_edit": can_edit(), "account": g.get("account")}
+
+
+@app.after_request
+def protect_personnel_cache(response):
+    if request.endpoint != "static":
+        response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    error = None
+    status = 200
+    if request.method == "POST":
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
+        try:
+            with closing(pyodbc.connect(AUTH_CONNECTION_STRING)) as db:
+                row = db.cursor().execute("""
+                    SELECT user_id, password_hash, must_change_password
+                    FROM search.users WHERE email = ? AND is_active = 1
+                """, email).fetchone()
+        except pyodbc.Error:
+            app.logger.exception("Could not sign in to the Personnel Portal")
+            abort(503, "Personnel sign-in is unavailable.")
+
+        # The existing Search Portal compares the submitted password directly.
+        if not password or not row or not hmac.compare_digest(
+            password.encode(), (row.password_hash or "").encode()
+        ):
+            error, status = "Invalid email or password.", 401
+        elif row.must_change_password:
+            error, status = "Change your password in the BCSO Search Portal, then sign in here.", 403
+        else:
+            session.clear()
+            session.permanent = True
+            session["user_id"] = str(row.user_id)
+            session["csrf_token"] = secrets.token_urlsafe(32)
+            return redirect(url_for("index"), code=303)
+
+    if "csrf_token" not in session:
+        session["csrf_token"] = secrets.token_urlsafe(32)
+    return render_template("login.html", error=error, search_portal_url=SEARCH_PORTAL_URL), status
+
+
+@app.post("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"), code=303)
+
 
 CSV_FIELD_ALIASES = {
     "employee_id": ["employee_id", "Employee ID", "employee id", "EmployeeId"],
@@ -81,19 +193,19 @@ def display_division(value: str) -> str:
     return normalized
 
 
-EDITABLE_FIELDS = {
-    "name",
-    "email",
-    "rank",
-    "division",
-    "status",
-    "sequence_num",
-    "department_cell",
-    "radio_id",
-    "race",
-    "sex",
-    "notes",
-}
+MEMBER_FIELDS = (
+    ("name", "Name", 200),
+    ("email", "Email", 320),
+    ("division", "Division", 200),
+    ("status", "Status", 100),
+    ("department_cell", "Department cell", 100),
+    ("notes", "Notes", None),
+    ("rank", "Rank", 200),
+    ("sequence_num", "Sequence", 50),
+    ("radio_id", "Radio ID", 50),
+    ("race", "Race", 50),
+    ("sex", "Sex", 20),
+)
 
 
 def normalize_name(name: str) -> str:
@@ -477,26 +589,56 @@ def name_suggestions():
     except Exception as exc:
         return jsonify({"suggestions": [], "error": str(exc)}), 500
 
-@app.post("/update-cell")
-def update_cell():
-    payload = request.get_json(silent=True) or {}
-    employee_id = str(payload.get("employee_id", "")).strip()
-    field = str(payload.get("field", "")).strip()
-    value = str(payload.get("value", "")).strip()
+@app.route("/personnel/<employee_id>/edit", methods=["GET", "POST"])
+def edit_member(employee_id):
+    columns = [field for field, _, _ in MEMBER_FIELDS]
+    with closing(get_db()) as db:
+        cursor = db.cursor()
+        record = cursor.execute(
+            f"""
+            SELECT {', '.join(columns)}, CONVERT(varchar(33), imported_at, 126)
+            FROM dbo.agency_members WHERE employee_id = ?
+            """,
+            employee_id,
+        ).fetchone()
+        if record is None:
+            abort(404)
+        values = dict(zip(columns, record))
+        revision = record[len(columns)]
+        error = None
+        status = 200
+        if request.method == "POST":
+            values = {field: request.form.get(field, "").strip() for field in columns}
+            if any(field not in request.form for field in columns):
+                abort(400)
+            for field, label, limit in MEMBER_FIELDS:
+                if limit is not None and len(values[field].encode("utf-16-le")) // 2 > limit:
+                    error, status = f"{label} is too long.", 400
+                    break
+            if not error:
+                assignments = ", ".join(f"{field} = ?" for field in columns)
+                cursor.execute(
+                    f"""
+                    UPDATE dbo.agency_members SET {assignments}, imported_at = SYSUTCDATETIME()
+                    WHERE employee_id = ? AND CONVERT(varchar(33), imported_at, 126) = ?
+                    """,
+                    *(values[field] for field in columns), employee_id, request.form.get("revision", ""),
+                )
+                if cursor.rowcount == 1:
+                    db.commit()
+                    return redirect(url_for("index", search_name=values["name"]), code=303)
+                error, status = "This record changed while you were editing. Reopen it before saving.", 409
+                revision = request.form.get("revision", "")
+        options = {
+            "division": DIVISION_OPTIONS, "status": STATUS_OPTIONS,
+            "rank": fetch_rank_options(db), "race": RACE_OPTIONS, "sex": SEX_OPTIONS,
+        }
 
-    if not employee_id or field not in EDITABLE_FIELDS:
-        return jsonify({"ok": False, "error": "Invalid employee_id or field."}), 400
+    return render_template(
+        "edit_member.html", employee_id=employee_id, fields=MEMBER_FIELDS,
+        values=values, options=options, error=error, revision=revision,
+    ), status
 
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute(
-        f"UPDATE dbo.agency_members SET {field} = ?, imported_at = SYSUTCDATETIME() WHERE employee_id = ?",
-        value,
-        employee_id,
-    )
-    db.commit()
-    db.close()
-    return jsonify({"ok": True})
 
 @app.post("/approve")
 def approve_guess():
@@ -570,6 +712,7 @@ def selected_inventory_area():
 @app.get("/inventory")
 def inventory_page():
     area = selected_inventory_area()
+    editing = can_edit() and request.args.get("edit") == "1"
     try:
         with closing(get_db()) as db:
             initialize_inventory(db)
@@ -578,12 +721,14 @@ def inventory_page():
                 FROM dbo.inventory_devices WHERE inventory_area = ?
                 ORDER BY device_name, serial_number
             """, area).fetchall()
-            roster = db.cursor().execute("""
-                SELECT employee_id, name, division FROM dbo.agency_members
-                WHERE NULLIF(LTRIM(RTRIM(name)), '') IS NOT NULL
-                  AND COALESCE(status, '') <> 'Inactive'
-                ORDER BY name, employee_id
-            """).fetchall()
+            roster = []
+            if editing:
+                roster = db.cursor().execute("""
+                    SELECT employee_id, name, division FROM dbo.agency_members
+                    WHERE NULLIF(LTRIM(RTRIM(name)), '') IS NOT NULL
+                      AND COALESCE(status, '') <> 'Inactive'
+                    ORDER BY name, employee_id
+                """).fetchall()
             history = inventory.fetch_history(db, "device_id", area)
     except pyodbc.Error:
         app.logger.exception("Could not load inventory")
@@ -598,7 +743,7 @@ def inventory_page():
     available_devices = [device for device in devices if device.device_id not in active_assignments]
     messages = {"added": "Device added.", "issued": "Device issued.", "returned": "Device returned."}
     return render_template(
-        "inventory.html", area=area, areas=inventory.AREAS, devices=devices, roster=roster, history=history,
+        "inventory.html", area=area, areas=inventory.AREAS, devices=devices, roster=roster, history=history, editing=editing,
         active_assignments=active_assignments, available_devices=available_devices,
         issued_count=len(devices) - len(available_devices), message=messages.get(request.args.get("result")),
     )
@@ -657,7 +802,7 @@ def change_inventory(action):
         return render_template("inventory.html", area=area, areas=inventory.AREAS, error="The inventory update could not be completed."), 503
 
     result = {"add": "added", "issue": "issued", "return": "returned"}[action]
-    return redirect(url_for("inventory_page", area=area, result=result), code=303)
+    return redirect(url_for("inventory_page", area=area, edit=1, result=result), code=303)
 
 
 @app.route("/", methods=["GET", "POST"])

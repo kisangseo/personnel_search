@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block title %}Sign in | Personnel Admin Portal{% endblock %}
+{% block content %}
+<section class="panel sign-in">
+  <h1>Sign in</h1>
+  <p>Use your BCSO Search Portal account.</p>
+  {% if error %}<p class="notice error" role="alert">{{ error }}</p>{% endif %}
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+    <label>Email <input type="email" name="email" autocomplete="username" required></label>
+    <label>Password <input type="password" name="password" autocomplete="current-password" required></label>
+    <button class="primary" type="submit">Sign in</button>
+  </form>
+  <a href="{{ search_portal_url }}">BCSO Search Portal</a>
+</section>
+{% endblock %}

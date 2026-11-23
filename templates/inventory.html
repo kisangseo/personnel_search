@@ -2,7 +2,16 @@
 {% from "equipment_history.html" import equipment_history %}
 {% block title %}Inventory | Personnel Admin Portal{% endblock %}
 {% block content %}
-  <h1>Inventory</h1>
+  <div class="section-head page-heading">
+    <h1>Inventory</h1>
+    {% if can_edit and not error %}
+      {% if editing %}
+        <a class="button" href="{{ url_for('inventory_page', area=area) }}">Done</a>
+      {% else %}
+        <a class="button" href="{{ url_for('inventory_page', area=area, edit=1) }}">Edit inventory</a>
+      {% endif %}
+    {% endif %}
+  </div>
   <nav class="inventory-tabs" aria-label="Inventory areas">
     {% for key, label in areas.items() %}
       <a href="{{ url_for('inventory_page', area=key) }}"{% if key == area %} aria-current="page"{% endif %}>{{ label }}</a>
@@ -19,10 +28,12 @@
       <div><dt>Total devices</dt><dd>{{ devices|length }}</dd></div>
     </dl>
 
+    {% if editing %}
     <div class="inventory-actions">
     <section class="panel">
       <h2>Add device</h2>
       <form class="form-row" method="post" action="{{ url_for('change_inventory', action='add', area=area) }}">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
         <label>Device name <input name="device_name" maxlength="200" required></label>
         <label>Serial number <input name="serial_number" maxlength="150" required></label>
         <button class="primary" type="submit">Add to stock</button>
@@ -33,6 +44,7 @@
       <h2>Issue device</h2>
       {% if available_devices and roster %}
         <form class="form-row" method="post" action="{{ url_for('change_inventory', action='issue', area=area) }}">
+          <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
           <label>Device
             <select name="device_id" required>
               <option value="">Select a device</option>
@@ -61,6 +73,7 @@
     </section>
 
     </div>
+    {% endif %}
 
     <section class="panel table-panel">
       <div class="section-head"><h2>Devices</h2></div>
@@ -74,7 +87,7 @@
               <th scope="col">Issued to</th>
               <th scope="col">Last return date</th>
               <th scope="col">Assignment history</th>
-              <th scope="col">Action</th>
+              {% if editing %}<th scope="col">Action</th>{% endif %}
             </tr>
           </thead>
           <tbody>
@@ -96,18 +109,21 @@
                     </details>
                   {% else %}—{% endif %}
                 </td>
+                {% if editing %}
                 <td>
                   {% if current %}
                     <form method="post" action="{{ url_for('change_inventory', action='return', area=area) }}">
+                      <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
                       <input type="hidden" name="device_id" value="{{ device.device_id }}">
                       <input type="hidden" name="assignment_id" value="{{ current.assignment_id }}">
                       <button type="submit" aria-label="Return {{ device.device_name }} ({{ device.serial_number }})">Return</button>
                     </form>
                   {% else %}—{% endif %}
                 </td>
+                {% endif %}
               </tr>
             {% else %}
-              <tr><td class="empty" colspan="7">No devices added yet.</td></tr>
+              <tr><td class="empty" colspan="{{ 7 if editing else 6 }}">No devices added yet.</td></tr>
             {% endfor %}
           </tbody>
         </table>
