@@ -626,7 +626,7 @@ def edit_member(employee_id):
                 )
                 if cursor.rowcount == 1:
                     db.commit()
-                    return redirect(url_for("index", search_name=values["name"]), code=303)
+                    return "", 204
                 error, status = "This record changed while you were editing. Reopen it before saving.", 409
                 revision = request.form.get("revision", "")
         options = {
@@ -730,6 +730,8 @@ def inventory_page():
                     ORDER BY name, employee_id
                 """).fetchall()
             history = inventory.fetch_history(db, "device_id", area)
+            stock = inventory.quartermaster_stock(db) if area == "quartermaster" else {}
+            quartermaster_issued = inventory.quartermaster_history(db, active_only=True) if area == "quartermaster" else []
     except pyodbc.Error:
         app.logger.exception("Could not load inventory")
         return render_template("inventory.html", area=area, areas=inventory.AREAS, error="Inventory is temporarily unavailable."), 503
@@ -753,6 +755,8 @@ def inventory_page():
         issued_count=len(devices) - len(available_devices), message=messages.get(request.args.get("result")),
         catalog=catalog, catalog_items=catalog_items, catalog_categories=catalog_categories,
         catalog_query=catalog_query, catalog_category=catalog_category,
+        stock=stock, quartermaster_issued=quartermaster_issued,
+        stock_message=request.args.get("stock_message"), stock_error=request.args.get("stock_error"),
     )
 
 
@@ -760,6 +764,47 @@ def initialize_inventory(db):
     # Supports opening Inventory directly on an empty database.
     initialize_database(db)
     inventory.initialize_schema(db)
+
+
+@app.post("/inventory/quartermaster/stock")
+def change_quartermaster_stock():
+    action = request.form.get("action")
+    variant_id = request.form.get("variant_id", "")
+    quantity = request.form.get("quantity", type=int)
+    destination = dict(
+        area="quartermaster", edit=1, q=request.form.get("q") or None,
+        category=request.form.get("category") or None, _anchor="quartermaster-catalog",
+    )
+    try:
+        with closing(get_db()) as db:
+            initialize_inventory(db)
+            if action == "return":
+                assignment_id = request.form.get("assignment_id", type=int)
+                if not assignment_id or not 0 < assignment_id <= 2147483647:
+                    raise ValueError("Select a valid assignment.")
+                inventory.return_quartermaster_stock(db, assignment_id)
+                message = "Assignment returned to stock."
+            else:
+                if action not in {"add", "assign"} or variant_id not in inventory.CATALOG_VARIANTS:
+                    raise ValueError("Select a valid item and size.")
+                if not quantity or not 0 < quantity <= 2147483647:
+                    raise ValueError("Enter a positive whole-number quantity.")
+                if action == "add":
+                    inventory.add_quartermaster_stock(db, variant_id, quantity)
+                    message = "Stock added."
+                else:
+                    employee_id = request.form.get("recipient_id", "").strip()
+                    if not employee_id or len(employee_id) > 50:
+                        raise ValueError("Select an active person from the roster.")
+                    inventory.assign_quartermaster_stock(db, variant_id, quantity, employee_id, g.account.email)
+                    message = "Items assigned."
+            db.commit()
+    except ValueError as exc:
+        return redirect(url_for("inventory_page", **destination, stock_error=str(exc)), code=303)
+    except pyodbc.Error:
+        app.logger.exception("Could not update Quartermaster stock")
+        return redirect(url_for("inventory_page", **destination, stock_error="The stock change could not be saved."), code=303)
+    return redirect(url_for("inventory_page", **destination, stock_message=message), code=303)
 
 
 @app.post("/inventory/<action>")
@@ -847,6 +892,10 @@ def index():
         try:
             inventory.initialize_schema(db)
             equipment_history = inventory.fetch_history(db, "employee_id")
+            for entry in inventory.quartermaster_history(db):
+                equipment_history[entry["employee_id"]].append(entry)
+            for entries in equipment_history.values():
+                entries.sort(key=lambda entry: entry["issued_at"], reverse=True)
         except pyodbc.Error:
             app.logger.exception("Could not load personnel equipment history")
         finally:

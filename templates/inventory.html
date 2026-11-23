@@ -22,7 +22,10 @@
     <a href="{{ url_for('inventory_page', area=area) }}">Back to Inventory</a>
   {% else %}
     {% if message %}<p class="notice" role="status">{{ message }}</p>{% endif %}
-    {% if catalog %}<h2>Serialized inventory</h2>{% endif %}
+    {% if catalog %}
+      {% include "quartermaster_catalog.html" %}
+      <h2>Serialized inventory</h2>
+    {% endif %}
     <dl class="stock-summary">
       <div><dt>In stock</dt><dd>{{ devices|length - issued_count }}</dd></div>
       <div><dt>Issued</dt><dd>{{ issued_count }}</dd></div>
@@ -75,8 +78,6 @@
 
     </div>
     {% endif %}
-
-    {% if catalog %}{% include "quartermaster_catalog.html" %}{% endif %}
 
     <section class="panel table-panel">
       <div class="section-head"><h2>Devices</h2></div>

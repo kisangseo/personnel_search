@@ -45,3 +45,33 @@ BEGIN
             WHERE returned_at IS NULL;
     END;
 END;
+
+IF OBJECT_ID('dbo.quartermaster_stock', 'U') IS NULL
+BEGIN
+    DECLARE @stock_lock INT;
+    EXEC @stock_lock = sp_getapplock
+        @Resource = 'personnel_quartermaster_schema',
+        @LockMode = 'Exclusive', @LockOwner = 'Transaction';
+    IF @stock_lock < 0
+        THROW 50002, 'Could not initialize Quartermaster stock.', 1;
+
+    IF OBJECT_ID('dbo.quartermaster_stock', 'U') IS NULL
+    BEGIN
+        CREATE TABLE dbo.quartermaster_stock (
+            variant_id VARCHAR(12) NOT NULL PRIMARY KEY,
+            quantity BIGINT NOT NULL CHECK (quantity >= 0)
+        );
+
+        CREATE TABLE dbo.quartermaster_assignments (
+            assignment_id INT IDENTITY PRIMARY KEY,
+            variant_id VARCHAR(12) NOT NULL REFERENCES dbo.quartermaster_stock(variant_id),
+            item_name NVARCHAR(300) NOT NULL,
+            employee_id NVARCHAR(50) NOT NULL REFERENCES dbo.agency_members(employee_id),
+            division NVARCHAR(200) NULL,
+            issued_by NVARCHAR(320) NOT NULL,
+            quantity INT NOT NULL CHECK (quantity > 0),
+            issued_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+            returned_at DATETIME2 NULL
+        );
+    END;
+END;

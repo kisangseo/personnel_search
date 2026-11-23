@@ -168,3 +168,8 @@ details > .table-scroll { margin-top: .4rem; }
 .catalog-group > summary span, .catalog-group small { color: var(--muted); font-weight: 400; }
 .catalog-group td:first-child { width: 42%; font-weight: 650; }
 .catalog-group th { white-space: normal; }
+
+.member-editor { margin-block: .75rem; }
+.member-edit-error { color: #8c2726; }
+.member-edit[hidden] { display: none; }
+.catalog-filter input[type="number"] { width: 100%; }
