@@ -167,11 +167,10 @@ def assign_quartermaster_stock(db, variant_id, quantity, employee_id, issued_by)
     cursor = db.cursor()
     member = cursor.execute("""
         SELECT division FROM dbo.agency_members
-        WHERE employee_id = ? AND NULLIF(LTRIM(RTRIM(name)), '') IS NOT NULL
-          AND COALESCE(status, '') <> 'Inactive'
+        WHERE employee_id = ?
     """, employee_id).fetchone()
     if member is None:
-        raise ValueError("Select an active person from the roster.")
+        raise ValueError("Select a person from the roster.")
 
     cursor.execute("""
         UPDATE dbo.quartermaster_stock SET quantity = quantity - ?

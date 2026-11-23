@@ -87,4 +87,4 @@ a connection with SELECT access. Password changes remain in the Search Portal.
 
 Active accounts can view Personnel and Inventory. Only accounts with `admin`
 or `edit` permission can save changes. Open a personnel record and select **Edit**
-to change its fields, or select **Edit inventory** to manage devices.
+to change its fields. Inventory actions appear directly on the page for editors.

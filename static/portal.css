@@ -156,8 +156,6 @@ details > .table-scroll { margin-top: .4rem; }
 .sign-in label, .member-form label { display: grid; gap: .3rem; min-width: 0; font-weight: 650; }
 .member-form { max-width: 52rem; }
 .member-form .dialog-actions { margin-top: 1rem; }
-.page-heading { margin-bottom: 1.15rem; }
-.page-heading h1 { margin-bottom: 0; }
 .member-status { display: inline-block; padding: .22rem .54rem; border-radius: 1rem; background: #edf0f5; color: #415470; }
 .member-status[data-status="Active"] { background: #e3f6ec; color: #166245; }
 
@@ -172,4 +170,16 @@ details > .table-scroll { margin-top: .4rem; }
 .member-editor { margin-block: .75rem; }
 .member-edit-error { color: #8c2726; }
 .member-edit[hidden] { display: none; }
-.catalog-filter input[type="number"] { width: 100%; }
+
+.catalog-variants th[scope="rowgroup"] {
+  width: 35%;
+  background: #f3f7fd;
+  font-size: inherit;
+  vertical-align: top;
+}
+.catalog-variants td:first-child { width: auto; font-weight: inherit; }
+.stock-row-actions { display: flex; gap: .45rem; flex-wrap: wrap; }
+.stock-row-form { margin-top: .65rem; }
+.stock-row-form [hidden] { display: none; }
+.stock-row-form input[type="number"] { width: 100%; }
+.stock-row-feedback { margin: .55rem 0 0; }

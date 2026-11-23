@@ -2,16 +2,7 @@
 {% from "equipment_history.html" import equipment_history %}
 {% block title %}Inventory | Personnel Admin Portal{% endblock %}
 {% block content %}
-  <div class="section-head page-heading">
-    <h1>Inventory</h1>
-    {% if can_edit and not error %}
-      {% if editing %}
-        <a class="button" href="{{ url_for('inventory_page', area=area) }}">Done</a>
-      {% else %}
-        <a class="button" href="{{ url_for('inventory_page', area=area, edit=1) }}">Edit inventory</a>
-      {% endif %}
-    {% endif %}
-  </div>
+  <h1>Inventory</h1>
   <nav class="inventory-tabs" aria-label="Inventory areas">
     {% for key, label in areas.items() %}
       <a href="{{ url_for('inventory_page', area=key) }}"{% if key == area %} aria-current="page"{% endif %}>{{ label }}</a>
@@ -32,7 +23,7 @@
       <div><dt>Total devices</dt><dd>{{ devices|length }}</dd></div>
     </dl>
 
-    {% if editing %}
+    {% if can_edit %}
     <div class="inventory-actions">
     <section class="panel">
       <h2>Add device</h2>
@@ -91,7 +82,7 @@
               <th scope="col">Issued to</th>
               <th scope="col">Last return date</th>
               <th scope="col">Assignment history</th>
-              {% if editing %}<th scope="col">Action</th>{% endif %}
+              {% if can_edit %}<th scope="col">Action</th>{% endif %}
             </tr>
           </thead>
           <tbody>
@@ -113,7 +104,7 @@
                     </details>
                   {% else %}—{% endif %}
                 </td>
-                {% if editing %}
+                {% if can_edit %}
                 <td>
                   {% if current %}
                     <form method="post" action="{{ url_for('change_inventory', action='return', area=area) }}">
@@ -127,7 +118,7 @@
                 {% endif %}
               </tr>
             {% else %}
-              <tr><td class="empty" colspan="{{ 7 if editing else 6 }}">No devices added yet.</td></tr>
+              <tr><td class="empty" colspan="{{ 7 if can_edit else 6 }}">No devices added yet.</td></tr>
             {% endfor %}
           </tbody>
         </table>

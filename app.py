@@ -712,7 +712,6 @@ def selected_inventory_area():
 @app.get("/inventory")
 def inventory_page():
     area = selected_inventory_area()
-    editing = can_edit() and request.args.get("edit") == "1"
     try:
         with closing(get_db()) as db:
             initialize_inventory(db)
@@ -722,12 +721,18 @@ def inventory_page():
                 ORDER BY device_name, serial_number
             """, area).fetchall()
             roster = []
-            if editing:
+            if can_edit():
                 roster = db.cursor().execute("""
                     SELECT employee_id, name, division FROM dbo.agency_members
                     WHERE NULLIF(LTRIM(RTRIM(name)), '') IS NOT NULL
                       AND COALESCE(status, '') <> 'Inactive'
                     ORDER BY name, employee_id
+                """).fetchall()
+            quartermaster_roster = []
+            if can_edit() and area == "quartermaster":
+                quartermaster_roster = db.cursor().execute("""
+                    SELECT employee_id, name, division, status
+                    FROM dbo.agency_members ORDER BY name, employee_id
                 """).fetchall()
             history = inventory.fetch_history(db, "device_id", area)
             stock = inventory.quartermaster_stock(db) if area == "quartermaster" else {}
@@ -750,12 +755,13 @@ def inventory_page():
     available_devices = [device for device in devices if device.device_id not in active_assignments]
     messages = {"added": "Device added.", "issued": "Device issued.", "returned": "Device returned."}
     return render_template(
-        "inventory.html", area=area, areas=inventory.AREAS, devices=devices, roster=roster, history=history, editing=editing,
+        "inventory.html", area=area, areas=inventory.AREAS, devices=devices, roster=roster, history=history,
         active_assignments=active_assignments, available_devices=available_devices,
         issued_count=len(devices) - len(available_devices), message=messages.get(request.args.get("result")),
         catalog=catalog, catalog_items=catalog_items, catalog_categories=catalog_categories,
         catalog_query=catalog_query, catalog_category=catalog_category,
-        stock=stock, quartermaster_issued=quartermaster_issued,
+        stock=stock, quartermaster_issued=quartermaster_issued, quartermaster_roster=quartermaster_roster,
+        stock_variant=request.args.get("stock_variant") if can_edit() else None,
         stock_message=request.args.get("stock_message"), stock_error=request.args.get("stock_error"),
     )
 
@@ -772,9 +778,11 @@ def change_quartermaster_stock():
     variant_id = request.form.get("variant_id", "")
     quantity = request.form.get("quantity", type=int)
     destination = dict(
-        area="quartermaster", edit=1, q=request.form.get("q") or None,
+        area="quartermaster", q=request.form.get("q") or None,
         category=request.form.get("category") or None, _anchor="quartermaster-catalog",
     )
+    if action in {"add", "assign"} and variant_id in inventory.CATALOG_VARIANTS:
+        destination.update(stock_variant=variant_id, _anchor=f"stock-{variant_id}")
     try:
         with closing(get_db()) as db:
             initialize_inventory(db)
@@ -795,7 +803,7 @@ def change_quartermaster_stock():
                 else:
                     employee_id = request.form.get("recipient_id", "").strip()
                     if not employee_id or len(employee_id) > 50:
-                        raise ValueError("Select an active person from the roster.")
+                        raise ValueError("Select a person from the roster.")
                     inventory.assign_quartermaster_stock(db, variant_id, quantity, employee_id, g.account.email)
                     message = "Items assigned."
             db.commit()
@@ -854,7 +862,7 @@ def change_inventory(action):
         return render_template("inventory.html", area=area, areas=inventory.AREAS, error="The inventory update could not be completed."), 503
 
     result = {"add": "added", "issue": "issued", "return": "returned"}[action]
-    return redirect(url_for("inventory_page", area=area, edit=1, result=result), code=303)
+    return redirect(url_for("inventory_page", area=area, result=result), code=303)
 
 
 @app.route("/", methods=["GET", "POST"])

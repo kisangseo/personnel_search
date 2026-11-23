@@ -3,11 +3,10 @@
     <h2>Quartermaster catalog</h2>
     <span>{{ catalog_items|length }} of {{ catalog["items"]|length }} items</span>
   </div>
-  {% if stock_error %}<p class="notice error" role="alert">{{ stock_error }}</p>{% endif %}
-  {% if stock_message %}<p class="notice" role="status">{{ stock_message }}</p>{% endif %}
+  {% if stock_error and not stock_variant %}<p class="notice error" role="alert">{{ stock_error }}</p>{% endif %}
+  {% if stock_message and not stock_variant %}<p class="notice" role="status">{{ stock_message }}</p>{% endif %}
   <form class="form-row catalog-filter" method="get" action="{{ url_for('inventory_page') }}#quartermaster-catalog">
     <input type="hidden" name="area" value="quartermaster">
-    {% if editing %}<input type="hidden" name="edit" value="1">{% endif %}
     <label>Search by item or size <input name="q" type="search" value="{{ catalog_query }}"></label>
     <label>Category
       <select name="category">
@@ -19,55 +18,64 @@
     </label>
     <button type="submit" class="primary">Filter</button>
     {% if catalog_query or catalog_category %}
-      <a class="button" href="{{ url_for('inventory_page', area=area, edit=1 if editing else none) }}#quartermaster-catalog">Clear</a>
+      <a class="button" href="{{ url_for('inventory_page', area=area) }}#quartermaster-catalog">Clear</a>
     {% endif %}
   </form>
-  {% if editing and catalog_items %}
-    <form class="form-row catalog-filter" method="post" action="{{ url_for('change_quartermaster_stock') }}">
-      <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-      <input type="hidden" name="q" value="{{ catalog_query }}">
-      <input type="hidden" name="category" value="{{ catalog_category }}">
-      <label>Item and size
-        <select name="variant_id" required>
-          <option value="">Select an item</option>
-          {% for category, items in catalog_items|groupby('category') %}
-            <optgroup label="{{ category }}">
-              {% for item in items %}
-                {% for variant in item.variants %}
-                  <option value="{{ variant.source[0] }}">{{ item.name }}{% if variant.label != 'Unspecified' %} · {{ variant.label }}{% endif %} ({{ stock.get(variant.source[0], 0) }} in stock)</option>
-                {% endfor %}
-              {% endfor %}
-            </optgroup>
-          {% endfor %}
-        </select>
-      </label>
-      <label>Quantity <input type="number" name="quantity" min="1" max="2147483647" step="1" required></label>
-      <label>Assign to
-        <select name="recipient_id">
-          <option value="">Select a person when assigning</option>
-          {% for person in roster %}
-            <option value="{{ person.employee_id }}">{{ person.name }}{% if person.division %} · {{ person.division }}{% endif %} ({{ person.employee_id }})</option>
-          {% endfor %}
-        </select>
-      </label>
-      <button class="primary" name="action" value="add">Add stock</button>
-      <button class="primary" name="action" value="assign">Assign</button>
-    </form>
+  {% if can_edit and catalog_items %}
+    <div id="stock-editor" hidden>
+      <form class="form-row stock-row-form" method="post" action="{{ url_for('change_quartermaster_stock') }}">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+        <input type="hidden" name="q" value="{{ catalog_query }}">
+        <input type="hidden" name="category" value="{{ catalog_category }}">
+        <input type="hidden" name="variant_id">
+        <input type="hidden" name="action">
+        <label>Quantity <input type="number" name="quantity" min="1" max="2147483647" step="1" required></label>
+        <label data-stock-recipient hidden>Assign to
+          <select name="recipient_id" disabled>
+            <option value="">Select a person</option>
+            {% for person in quartermaster_roster %}
+              <option value="{{ person.employee_id }}">{{ person.name or 'Unnamed' }}{% if person.division %} · {{ person.division }}{% endif %}{% if person.status == 'Inactive' %} · Inactive{% endif %} ({{ person.employee_id }})</option>
+            {% endfor %}
+          </select>
+        </label>
+        <button type="submit" class="primary" data-stock-submit>Add stock</button>
+        <button type="button" data-stock-cancel>Cancel</button>
+      </form>
+    </div>
   {% endif %}
   {% for category, items in catalog_items|groupby('category') %}
     <details class="catalog-group"{% if catalog_query or catalog_category %} open{% endif %}>
       <summary>{{ category }} <span>({{ items|length }})</span></summary>
       <div class="table-scroll">
-        <table>
-          <thead><tr><th scope="col">Item</th><th scope="col">Variant and stock on hand</th></tr></thead>
+        <table class="catalog-variants">
+          <thead>
+            <tr><th scope="col">Item</th><th scope="col">Size or variant</th><th scope="col">In stock</th>{% if can_edit %}<th scope="col">Actions</th>{% endif %}</tr>
+          </thead>
+          {% for item in items %}
           <tbody>
-            {% for item in items %}
-              <tr>
-                <td>{{ item.name }}</td>
-                <td>{% for variant in item.variants %}{{ variant.label }} ({{ stock.get(variant.source[0], 0) }}){% if not loop.last %}, {% endif %}{% endfor %}</td>
+            {% for variant in item.variants %}
+              {% set variant_id = variant.source[0] %}
+              {% set on_hand = stock.get(variant_id, 0) %}
+              <tr id="stock-{{ variant_id }}" data-stock-variant="{{ variant_id }}">
+                {% if loop.first %}<th scope="rowgroup" rowspan="{{ item.variants|length }}">{{ item.name }}</th>{% endif %}
+                <td>{{ variant.label if variant.label != 'Unspecified' else '—' }}</td>
+                <td>{{ on_hand }}</td>
+                {% if can_edit %}
+                  <td>
+                    <div class="stock-row-actions">
+                      <button type="button" aria-controls="stock-editor" aria-expanded="false" data-stock-action="add">Add</button>
+                      <button type="button" aria-controls="stock-editor" aria-expanded="false" data-stock-action="assign">Assign</button>
+                    </div>
+                    {% if stock_variant == variant_id %}
+                      {% if stock_error %}<p class="notice error stock-row-feedback" role="alert">{{ stock_error }}</p>{% endif %}
+                      {% if stock_message %}<p class="notice stock-row-feedback" role="status">{{ stock_message }}</p>{% endif %}
+                    {% endif %}
+                  </td>
+                {% endif %}
               </tr>
             {% endfor %}
           </tbody>
+          {% endfor %}
         </table>
       </div>
     </details>
@@ -79,13 +87,13 @@
     {% if quartermaster_issued %}
       <div class="table-scroll">
         <table>
-          <thead><tr><th scope="col">Item</th><th scope="col">Assigned to</th><th scope="col">Quantity</th><th scope="col">Date</th>{% if editing %}<th scope="col">Action</th>{% endif %}</tr></thead>
+          <thead><tr><th scope="col">Item</th><th scope="col">Assigned to</th><th scope="col">Quantity</th><th scope="col">Date</th>{% if can_edit %}<th scope="col">Action</th>{% endif %}</tr></thead>
           <tbody>
             {% for entry in quartermaster_issued %}
               <tr>
                 <td>{{ entry.device_name }}</td><td>{{ entry.recipient }}</td>
                 <td>{{ entry.quantity }}</td><td>{{ entry.issue_date }}</td>
-                {% if editing %}
+                {% if can_edit %}
                   <td>
                     <form method="post" action="{{ url_for('change_quartermaster_stock') }}">
                       <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
@@ -113,4 +121,7 @@
       {% endfor %}
     </ul>
   </details>
+  {% if can_edit %}
+    <script src="{{ url_for('static', filename='quartermaster.js') }}" defer></script>
+  {% endif %}
 </section>
