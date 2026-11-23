@@ -183,3 +183,8 @@ details > .table-scroll { margin-top: .4rem; }
 .stock-row-form [hidden] { display: none; }
 .stock-row-form input[type="number"] { width: 100%; }
 .stock-row-feedback { margin: .55rem 0 0; }
+
+.stock-status.inactive { background: #edf0f5; color: #415470; }
+.workbook-detail { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .2rem .6rem; }
+.workbook-detail dt { font-weight: 650; }
+.workbook-detail dd { margin: 0; overflow-wrap: anywhere; }

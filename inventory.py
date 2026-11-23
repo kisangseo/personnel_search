@@ -94,10 +94,18 @@ def issue_device(db, area, device_id, recipient_id, issuer_id):
     cursor.execute("""
         INSERT INTO dbo.inventory_assignments (device_id, employee_id, division, issued_by)
         SELECT d.device_id, ?, ?, ?
-        FROM dbo.inventory_devices d WHERE d.device_id = ? AND d.inventory_area = ?
+        FROM dbo.inventory_devices d
+        WHERE d.device_id = ? AND d.inventory_area = ?
+          AND NOT EXISTS (
+            SELECT 1 FROM dbo.technology_import_details t WHERE t.device_id = d.device_id AND t.inactive = 1
+          )
     """, recipient_id, recipient.division, issuer.name, device_id, area)
     if cursor.rowcount != 1:
-        raise ValueError("This device could not be found.")
+        raise ValueError("This device is inactive or could not be found.")
+    if area == "technology-center":
+        cursor.execute("""
+            UPDATE dbo.technology_import_details SET needs_review = 0 WHERE device_id = ?
+        """, device_id)
 
 
 def return_device(db, area, device_id, assignment_id):

@@ -1,4 +1,6 @@
 import csv
+import zipfile
+from xml.etree import ElementTree
 import hmac
 import secrets
 from datetime import timedelta
@@ -15,6 +17,7 @@ import pyodbc
 from flask import Flask, abort, g, jsonify, redirect, render_template, request, session, url_for
 
 import inventory
+import tech_import
 
 SQL_SERVER_CONN_STR = os.getenv("PERSONNEL_SQL_CONNECTION_STRING", "").strip()
 
@@ -735,6 +738,7 @@ def inventory_page():
                     FROM dbo.agency_members ORDER BY name, employee_id
                 """).fetchall()
             history = inventory.fetch_history(db, "device_id", area)
+            imported_details = tech_import.workbook_details(db) if area == "technology-center" else {}
             stock = inventory.quartermaster_stock(db) if area == "quartermaster" else {}
             quartermaster_issued = inventory.quartermaster_history(db, active_only=True) if area == "quartermaster" else []
     except pyodbc.Error:
@@ -752,12 +756,17 @@ def inventory_page():
         for entry in entries
         if entry["returned_at"] is None
     }
-    available_devices = [device for device in devices if device.device_id not in active_assignments]
+    available_devices = [
+        device for device in devices if device.device_id not in active_assignments
+        and not imported_details.get(device.device_id, {}).get("inactive")
+    ]
+    stock_count = sum(not imported_details.get(device.device_id, {}).get("needs_review") for device in available_devices)
     messages = {"added": "Device added.", "issued": "Device issued.", "returned": "Device returned."}
     return render_template(
         "inventory.html", area=area, areas=inventory.AREAS, devices=devices, roster=roster, history=history,
         active_assignments=active_assignments, available_devices=available_devices,
-        issued_count=len(devices) - len(available_devices), message=messages.get(request.args.get("result")),
+        issued_count=len(active_assignments), stock_count=stock_count, imported_details=imported_details,
+        import_summary=request.args.get("import_summary"), message=messages.get(request.args.get("result")),
         catalog=catalog, catalog_items=catalog_items, catalog_categories=catalog_categories,
         catalog_query=catalog_query, catalog_category=catalog_category,
         stock=stock, quartermaster_issued=quartermaster_issued, quartermaster_roster=quartermaster_roster,
@@ -813,6 +822,33 @@ def change_quartermaster_stock():
         app.logger.exception("Could not update Quartermaster stock")
         return redirect(url_for("inventory_page", **destination, stock_error="The stock change could not be saved."), code=303)
     return redirect(url_for("inventory_page", **destination, stock_message=message), code=303)
+
+
+@app.post("/inventory/technology-center/import")
+def import_technology_inventory():
+    area = "technology-center"
+    uploaded = request.files.get("inventory_workbook")
+    if not uploaded or not uploaded.filename.lower().endswith(".xlsx"):
+        return render_template("inventory.html", area=area, areas=inventory.AREAS, error="Choose an Excel .xlsx workbook."), 400
+    content = uploaded.stream.read(5 * 1024 * 1024 + 1)
+    if len(content) > 5 * 1024 * 1024:
+        return render_template("inventory.html", area=area, areas=inventory.AREAS, error="The workbook must be 5 MB or smaller."), 400
+    try:
+        devices = tech_import.read_devices(content)
+    except ValueError as exc:
+        return render_template("inventory.html", area=area, areas=inventory.AREAS, error=str(exc)), 400
+    except (OSError, KeyError, EOFError, openpyxl.utils.exceptions.InvalidFileException, zipfile.BadZipFile, ElementTree.ParseError):
+        return render_template("inventory.html", area=area, areas=inventory.AREAS, error="The workbook could not be opened. Save it as .xlsx and try again."), 400
+    try:
+        with closing(get_db()) as db:
+            initialize_inventory(db)
+            counts = tech_import.import_devices(db, devices)
+            db.commit()
+    except pyodbc.Error:
+        app.logger.exception("Technology Center inventory import failed")
+        return render_template("inventory.html", area=area, areas=inventory.AREAS, error="The import could not be saved."), 503
+    summary = "{added} added · {linked} linked to personnel · {review} need review · {skipped} already in inventory".format(**counts)
+    return redirect(url_for("inventory_page", area=area, import_summary=summary), code=303)
 
 
 @app.post("/inventory/<action>")
@@ -903,7 +939,7 @@ def index():
             for entry in inventory.quartermaster_history(db):
                 equipment_history[entry["employee_id"]].append(entry)
             for entries in equipment_history.values():
-                entries.sort(key=lambda entry: entry["issued_at"], reverse=True)
+                entries.sort(key=lambda entry: (entry["issued_at"] is not None, entry["issued_at"]), reverse=True)
         except pyodbc.Error:
             app.logger.exception("Could not load personnel equipment history")
         finally:

@@ -12,18 +12,30 @@
     <p class="notice error" role="alert">{{ error }}</p>
     <a href="{{ url_for('inventory_page', area=area) }}">Back to Inventory</a>
   {% else %}
+    {% if import_summary %}<p class="notice" role="status">{{ import_summary }}</p>{% endif %}
     {% if message %}<p class="notice" role="status">{{ message }}</p>{% endif %}
     {% if catalog %}
       {% include "quartermaster_catalog.html" %}
       <h2>Serialized inventory</h2>
     {% endif %}
     <dl class="stock-summary">
-      <div><dt>In stock</dt><dd>{{ devices|length - issued_count }}</dd></div>
+      <div><dt>In stock</dt><dd>{{ stock_count }}</dd></div>
       <div><dt>Issued</dt><dd>{{ issued_count }}</dd></div>
       <div><dt>Total devices</dt><dd>{{ devices|length }}</dd></div>
     </dl>
 
     {% if can_edit %}
+    {% if area == "technology-center" %}
+      <section class="panel">
+        <h2>Import Excel inventory</h2>
+        <form class="form-row" method="post" enctype="multipart/form-data" action="{{ url_for('import_technology_inventory') }}">
+          <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+          <label>Excel workbook <input type="file" name="inventory_workbook" accept=".xlsx" required></label>
+          <button class="primary" type="submit">Import devices</button>
+        </form>
+        <p class="catalog-caption">Existing serial numbers are skipped. Review flagged assignments before issuing those devices.</p>
+      </section>
+    {% endif %}
     <div class="inventory-actions">
     <section class="panel">
       <h2>Add device</h2>
@@ -44,7 +56,7 @@
             <select name="device_id" required>
               <option value="">Select a device</option>
               {% for device in available_devices %}
-                <option value="{{ device.device_id }}">{{ device.device_name }} ({{ device.serial_number }})</option>
+                <option value="{{ device.device_id }}">{{ device.device_name }} ({{ device.serial_number }}){% if imported_details.get(device.device_id, {}).get("needs_review") %} · Review assignment{% endif %}</option>
               {% endfor %}
             </select>
           </label>
@@ -89,11 +101,35 @@
             {% for device in devices %}
               {% set entries = history.get(device.device_id, []) %}
               {% set current = active_assignments.get(device.device_id) %}
+              {% set imported = imported_details.get(device.device_id) %}
               {% set last_return = entries|selectattr('return_date')|map(attribute='return_date')|max if entries|selectattr('return_date')|list else none %}
               <tr>
-                <td>{{ device.device_name }}</td>
+                <td>
+                  {{ device.device_name }}
+                  {% if imported %}
+                    <details>
+                      <summary>Workbook details</summary>
+                      {% for row in imported.rows %}
+                        <dl class="workbook-detail">
+                          <dt>Source</dt><dd>{{ row.sheet }}, row {{ row.row }}</dd>
+                          {% for field in ['Assigned User', 'Department', 'Status', 'Warranty Expiration Date', 'Issued Date', 'Notes', 'Extra Notes'] %}
+                            {% set value = row[field] %}
+                            {% if value is not none and value != '' %}
+                              <dt>{{ field }}</dt><dd>{{ value[:10] if field.endswith('Date') and value is string else value }}</dd>
+                            {% endif %}
+                          {% endfor %}
+                        </dl>
+                      {% endfor %}
+                    </details>
+                  {% endif %}
+                </td>
                 <td>{{ device.serial_number }}</td>
-                <td><span class="stock-status{% if current %} issued{% endif %}">{{ 'Issued' if current else 'In stock' }}</span></td>
+                <td>
+                  {% if current %}<span class="stock-status issued">Issued</span>
+                  {% elif imported and imported.inactive %}<span class="stock-status inactive">Inactive</span>
+                  {% elif imported and imported.needs_review %}<span class="stock-status issued">Review assignment</span>
+                  {% else %}<span class="stock-status">In stock</span>{% endif %}
+                </td>
                 <td>{{ (current.recipient or current.employee_id) if current else '—' }}</td>
                 <td>{{ last_return or '—' }}</td>
                 <td>
