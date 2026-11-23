@@ -10,7 +10,7 @@
   <header class="site-header">
     <div class="page-width header-inner">
       <a class="brand" href="{{ url_for('index') }}">
-        <span class="brand-mark" aria-hidden="true">BC</span>
+        <img class="brand-mark" src="{{ url_for('static', filename='bcso-logo.png') }}" width="48" height="48" alt="">
         <span>Baltimore City Sheriff’s Office<small>Personnel Admin Portal</small></span>
       </a>
       {% if account %}
