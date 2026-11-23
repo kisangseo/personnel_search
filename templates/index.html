@@ -1,7 +1,5 @@
-<!doctype html>
-<html lang="en">
-<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Personnel Admin Portal</title></head>
-<body>
+{% extends "layout.html" %}
+{% block content %}
   {% from "equipment_history.html" import equipment_history as render_equipment_history %}
   {% macro field_options(options, current_value) -%}
     {% if current_value and current_value not in options %}
@@ -11,16 +9,17 @@
       <option value="{{ option }}" {% if current_value == option %}selected{% endif %}>{{ option }}</option>
     {% endfor %}
   {%- endmacro %}
-  <h1>Personnel Admin Portal</h1>
-  <nav aria-label="Portal"><a href="{{ url_for('inventory_page') }}">Inventory</a></nav>
-  {% if db_error %}<p><strong>Database connection error:</strong> {{ db_error }}</p>{% endif %}
-  {% if import_result %}<p><strong>{{ import_result }}</strong></p>{% endif %}
+  <h1>Personnel</h1>
+  {% if db_error %}<p class="notice error" role="alert"><strong>Database connection error:</strong> {{ db_error }}</p>{% endif %}
+  {% if import_result %}<p class="notice" role="status"><strong>{{ import_result }}</strong></p>{% endif %}
 
-  <h3>Search</h3>
-  <form method="get">
-    <label>Name: <input type="text" id="search_name" name="search_name" value="{{ search_name }}" autocomplete="off" /></label>
-    <div id="name_suggestions" style="border:1px solid #ccc;display:none;max-width:260px;background:#fff;position:absolute;z-index:10;"></div>
-    <label>Division:
+  <section class="panel" aria-label="Search personnel">
+  <form class="form-row" method="get">
+    <div class="name-field">
+      <label>Name <input type="text" id="search_name" name="search_name" value="{{ search_name }}" autocomplete="off"></label>
+      <div class="suggestions" id="name_suggestions"></div>
+    </div>
+    <label>Division
       <select name="search_division">
         <option value="">All</option>
         {% for d in divisions %}
@@ -28,10 +27,11 @@
         {% endfor %}
       </select>
     </label>
-    <label>Radio ID: <input type="text" name="search_radio_id" value="{{ search_radio_id }}" /></label>
-    <button type="submit">Search</button>
-    <a href="/">Clear</a>
+    <label>Radio ID <input type="text" name="search_radio_id" value="{{ search_radio_id }}" /></label>
+    <button class="primary" type="submit">Search</button>
+    <a class="button" href="{{ url_for('index') }}">Clear</a>
   </form>
+  </section>
 
   {% if pending_approvals and pending_approvals|length > 0 %}
   <h3>Fuzzy Match Approvals</h3>
@@ -50,18 +50,20 @@
 
   {% if ingest_logs and ingest_logs|length > 0 %}
   <h3>Ingest Logs (latest upload)</h3>
-  <pre style="max-height:300px;overflow:auto;background:#f4f4f4;padding:10px;">{% for line in ingest_logs %}{{ line }}
+  <pre class="log-output">{% for line in ingest_logs %}{{ line }}
 {% endfor %}</pre>
   {% endif %}
 
-  <div style="display:flex;align-items:center;gap:12px;">
+  <section class="panel table-panel">
+  <div class="section-head">
     <h2>Agency Members ({{ members|length }})</h2>
-    <button type="button" id="add_member_button">Add Member</button>
+    <button class="primary" type="button" id="add_member_button">Add Member</button>
   </div>
 
   <dialog id="add_member_dialog">
-    <form method="post" action="/add-member" style="min-width:420px;">
-      <h3>Add Member</h3>
+    <form method="post" action="/add-member">
+      <h2>Add Member</h2>
+      <div class="dialog-fields">
       <p>
         <label>Employee ID<br/><input type="text" name="employee_id" required /></label>
       </p>
@@ -98,48 +100,54 @@
       <p>
         <label>Sex<br/><select name="sex">{{ field_options(sex_options, "") }}</select></label>
       </p>
-      <menu style="display:flex;gap:8px;justify-content:flex-end;padding:0;">
+      </div>
+      <menu class="dialog-actions">
         <button type="button" id="cancel_add_member">Cancel</button>
-        <button type="submit">Save Member</button>
+        <button class="primary" type="submit">Save Member</button>
       </menu>
     </form>
   </dialog>
-  <table border="1" cellpadding="6" cellspacing="0">
+  <div class="table-scroll">
+  <table class="member-table">
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Division</th>
-        <th>Status</th>
-        <th>Department Cell</th>
-        <th>Notes</th>
+        <th aria-label="Details"></th>
+        <th scope="col">Name</th>
+        <th scope="col">Email</th>
+        <th scope="col">Division</th>
+        <th scope="col">Status</th>
+        <th scope="col">Department Cell</th>
+        <th scope="col">Notes</th>
       </tr>
     </thead>
     <tbody>
       {% for m in members %}
-        <tr class="member-row" data-employee-id="{{ m.employee_id }}" tabindex="0" aria-expanded="false" style="cursor:pointer;">
+        <tr class="member-row" data-employee-id="{{ m.employee_id }}">
+          <td class="disclosure-cell">
+            <button class="disclosure" type="button" aria-expanded="false" aria-controls="details-{{ m.employee_id }}" aria-label="Details for {{ m.name or m.employee_id }}"></button>
+          </td>
           <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="name">{{ m.name or '' }}</td>
           <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="email">{{ m.email or '' }}</td>
           <td><select class="editable" data-employee-id="{{ m.employee_id }}" data-field="division">{{ field_options(division_options, m.division_display or "") }}</select></td>
-          <td><select class="editable" data-employee-id="{{ m.employee_id }}" data-field="status">{{ field_options(status_options, m.status or "") }}</select></td>
+          <td><select class="editable" data-employee-id="{{ m.employee_id }}" data-field="status" data-status="{{ m.status or '' }}">{{ field_options(status_options, m.status or "") }}</select></td>
           <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="department_cell">{{ m.department_cell or '' }}</td>
           <td class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="notes">{{ m.notes or '' }}</td>
         </tr>
         <tr class="member-details" id="details-{{ m.employee_id }}" hidden>
-          <td colspan="6">
-            <dl style="display:grid;grid-template-columns:max-content 1fr max-content 1fr;gap:8px 12px;margin:0;">
+          <td colspan="7">
+            <dl>
               <dt><strong>Employee ID</strong></dt>
-              <dd style="margin:0;">{{ m.employee_id }}</dd>
+              <dd>{{ m.employee_id }}</dd>
               <dt><strong>Rank</strong></dt>
-              <dd style="margin:0;"><select class="editable" data-employee-id="{{ m.employee_id }}" data-field="rank">{{ field_options(rank_options, m.rank or "") }}</select></dd>
+              <dd><select class="editable" data-employee-id="{{ m.employee_id }}" data-field="rank">{{ field_options(rank_options, m.rank or "") }}</select></dd>
               <dt><strong>Sequence</strong></dt>
-              <dd class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="sequence_num" style="margin:0;">{{ m.sequence_num or '' }}</dd>
+              <dd class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="sequence_num">{{ m.sequence_num or '' }}</dd>
               <dt><strong>Radio ID</strong></dt>
-              <dd class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="radio_id" style="margin:0;">{{ m.radio_id or '' }}</dd>
+              <dd class="editable" contenteditable="true" data-employee-id="{{ m.employee_id }}" data-field="radio_id">{{ m.radio_id or '' }}</dd>
               <dt><strong>Race</strong></dt>
-              <dd style="margin:0;"><select class="editable" data-employee-id="{{ m.employee_id }}" data-field="race">{{ field_options(race_options, m.race or "") }}</select></dd>
+              <dd><select class="editable" data-employee-id="{{ m.employee_id }}" data-field="race">{{ field_options(race_options, m.race or "") }}</select></dd>
               <dt><strong>Sex</strong></dt>
-              <dd style="margin:0;"><select class="editable" data-employee-id="{{ m.employee_id }}" data-field="sex">{{ field_options(sex_options, m.sex or "") }}</select></dd>
+              <dd><select class="editable" data-employee-id="{{ m.employee_id }}" data-field="sex">{{ field_options(sex_options, m.sex or "") }}</select></dd>
             </dl>
             <h3>Issued equipment</h3>
             {% if equipment_history is none %}
@@ -150,10 +158,12 @@
           </td>
         </tr>
       {% else %}
-        <tr><td colspan="6">No records loaded yet.</td></tr>
+        <tr><td class="empty" colspan="7">No records loaded yet.</td></tr>
       {% endfor %}
     </tbody>
   </table>
+  </div>
+  </section>
 
 <script>
   function getEditableValue(cell) {
@@ -227,17 +237,19 @@
       return;
     }
 
-    suggestionsBox.innerHTML = suggestions
-      .map((name) => `<div class="name-suggestion" style="padding:6px;cursor:pointer;">${name}</div>`)
-      .join('');
-    suggestionsBox.style.display = 'block';
-
-    document.querySelectorAll('.name-suggestion').forEach((el) => {
-      el.addEventListener('click', () => {
-        nameInput.value = el.textContent;
+    const options = suggestions.map((name) => {
+      const option = document.createElement('button');
+      option.type = 'button';
+      option.className = 'name-suggestion';
+      option.textContent = name;
+      option.addEventListener('click', () => {
+        nameInput.value = name;
         suggestionsBox.style.display = 'none';
       });
+      return option;
     });
+    suggestionsBox.replaceChildren(...options);
+    suggestionsBox.style.display = 'block';
   }
 
   if (nameInput) {
@@ -246,22 +258,12 @@
     nameInput.addEventListener('focus', loadNameSuggestions);
   }
 
-  function toggleMemberDetails(row) {
-    const detailsRow = row.nextElementSibling;
-    if (!detailsRow || !detailsRow.classList.contains('member-details')) return;
-
-    const isExpanded = row.getAttribute('aria-expanded') === 'true';
-    detailsRow.hidden = isExpanded;
-    row.setAttribute('aria-expanded', String(!isExpanded));
-  }
-
   document.querySelectorAll('tr.member-row').forEach((row) => {
-    row.addEventListener('click', () => toggleMemberDetails(row));
-    row.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        toggleMemberDetails(row);
-      }
+    const button = row.querySelector('.disclosure');
+    const details = document.getElementById(button.getAttribute('aria-controls'));
+    row.addEventListener('click', () => {
+      details.hidden = !details.hidden;
+      button.setAttribute('aria-expanded', String(!details.hidden));
     });
   });
 
@@ -269,7 +271,10 @@
     cell.dataset.originalValue = getEditableValue(cell);
     cell.addEventListener('click', (e) => e.stopPropagation());
     if (cell.tagName === 'SELECT') {
-      cell.addEventListener('change', () => saveCell(cell));
+      cell.addEventListener('change', async () => {
+        await saveCell(cell);
+        if (cell.dataset.field === 'status') cell.dataset.status = cell.value;
+      });
     } else {
       cell.addEventListener('blur', () => saveCell(cell));
     }
@@ -282,5 +287,4 @@
   });
 </script>
 
-</body>
-</html>
+{% endblock %}
