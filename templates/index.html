@@ -2,6 +2,7 @@
 <html lang="en">
 <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Personnel Admin Portal</title></head>
 <body>
+  {% from "equipment_history.html" import equipment_history as render_equipment_history %}
   {% macro field_options(options, current_value) -%}
     {% if current_value and current_value not in options %}
       <option value="{{ current_value }}" selected>{{ current_value }}</option>
@@ -11,6 +12,7 @@
     {% endfor %}
   {%- endmacro %}
   <h1>Personnel Admin Portal</h1>
+  <nav aria-label="Portal"><a href="{{ url_for('inventory_page') }}">Inventory</a></nav>
   {% if db_error %}<p><strong>Database connection error:</strong> {{ db_error }}</p>{% endif %}
   {% if import_result %}<p><strong>{{ import_result }}</strong></p>{% endif %}
 
@@ -139,6 +141,12 @@
               <dt><strong>Sex</strong></dt>
               <dd style="margin:0;"><select class="editable" data-employee-id="{{ m.employee_id }}" data-field="sex">{{ field_options(sex_options, m.sex or "") }}</select></dd>
             </dl>
+            <h3>Issued equipment</h3>
+            {% if equipment_history is none %}
+              <p>Equipment history is temporarily unavailable.</p>
+            {% else %}
+              {{ render_equipment_history(equipment_history.get(m.employee_id, []), show_area=true) }}
+            {% endif %}
           </td>
         </tr>
       {% else %}

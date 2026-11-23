@@ -1,0 +1,129 @@
+{% from "equipment_history.html" import equipment_history %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventory | Personnel Admin Portal</title>
+  <style>
+    body { margin: 1rem; }
+    nav, form { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem; }
+    label { display: grid; gap: .25rem; }
+    section { margin-block: 1.5rem; }
+    .table-scroll { overflow-x: auto; }
+    summary { cursor: pointer; }
+    .inventory-tabs a { padding: .4rem .6rem; }
+    .inventory-tabs a[aria-current="page"] { font-weight: bold; border-bottom: 2px solid; }
+    details table { margin-block: .5rem; }
+    td { vertical-align: top; }
+  </style>
+</head>
+<body>
+  <nav aria-label="Portal"><a href="{{ url_for('index') }}">Personnel</a></nav>
+  <h1>Inventory</h1>
+  <nav class="inventory-tabs" aria-label="Inventory areas">
+    {% for key, label in areas.items() %}
+      <a href="{{ url_for('inventory_page', area=key) }}"{% if key == area %} aria-current="page"{% endif %}>{{ label }}</a>
+    {% endfor %}
+  </nav>
+  {% if error %}
+    <p role="alert">{{ error }}</p>
+    <a href="{{ url_for('inventory_page', area=area) }}">Back to Inventory</a>
+  {% else %}
+    {% if message %}<p role="status">{{ message }}</p>{% endif %}
+    <p><strong>{{ devices|length - issued_count }}</strong> in stock · <strong>{{ issued_count }}</strong> issued · <strong>{{ devices|length }}</strong> total</p>
+
+    <section>
+      <h2>Add device</h2>
+      <form method="post" action="{{ url_for('change_inventory', action='add', area=area) }}">
+        <label>Device name <input name="device_name" maxlength="200" required></label>
+        <label>Serial number <input name="serial_number" maxlength="150" required></label>
+        <button type="submit">Add to stock</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Issue device</h2>
+      {% if available_devices and roster %}
+        <form method="post" action="{{ url_for('change_inventory', action='issue', area=area) }}">
+          <label>Device
+            <select name="device_id" required>
+              <option value="">Select a device</option>
+              {% for device in available_devices %}
+                <option value="{{ device.device_id }}">{{ device.device_name }} ({{ device.serial_number }})</option>
+              {% endfor %}
+            </select>
+          </label>
+          {% for field, label in [('recipient_id', 'Issue to'), ('issuer_id', 'Issued by')] %}
+            <label>{{ label }}
+              <select name="{{ field }}" required>
+                <option value="">Select a staff member</option>
+                {% for member in roster %}
+                  <option value="{{ member.employee_id }}">{{ member.name }}{% if member.division %} · {{ member.division|replace('_', ' ') }}{% endif %} ({{ member.employee_id }})</option>
+                {% endfor %}
+              </select>
+            </label>
+          {% endfor %}
+          <button type="submit">Issue device</button>
+        </form>
+      {% elif not available_devices %}
+        <p>No devices in stock.</p>
+      {% else %}
+        <p>No eligible staff members in the personnel roster.</p>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2>Devices</h2>
+      <div class="table-scroll">
+        <table border="1" cellpadding="6" cellspacing="0">
+          <thead>
+            <tr>
+              <th scope="col">Device</th>
+              <th scope="col">Serial number</th>
+              <th scope="col">Status</th>
+              <th scope="col">Issued to</th>
+              <th scope="col">Last return date</th>
+              <th scope="col">Assignment history</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for device in devices %}
+              {% set entries = history.get(device.device_id, []) %}
+              {% set current = active_assignments.get(device.device_id) %}
+              {% set last_return = entries|selectattr('return_date')|map(attribute='return_date')|max if entries|selectattr('return_date')|list else none %}
+              <tr>
+                <td>{{ device.device_name }}</td>
+                <td>{{ device.serial_number }}</td>
+                <td>{{ 'Issued' if current else 'In stock' }}</td>
+                <td>{{ (current.recipient or current.employee_id) if current else '—' }}</td>
+                <td>{{ last_return or '—' }}</td>
+                <td>
+                  {% if entries %}
+                    <details>
+                      <summary>View history</summary>
+                      {{ equipment_history(entries, show_recipient=true) }}
+                    </details>
+                  {% else %}—{% endif %}
+                </td>
+                <td>
+                  {% if current %}
+                    <form method="post" action="{{ url_for('change_inventory', action='return', area=area) }}">
+                      <input type="hidden" name="device_id" value="{{ device.device_id }}">
+                      <input type="hidden" name="assignment_id" value="{{ current.assignment_id }}">
+                      <button type="submit" aria-label="Return {{ device.device_name }} ({{ device.serial_number }})">Return</button>
+                    </form>
+                  {% else %}—{% endif %}
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="7">No devices added yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+</body>
+</html>
