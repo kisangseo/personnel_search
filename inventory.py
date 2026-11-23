@@ -1,15 +1,33 @@
+import json
 from collections import defaultdict
 from datetime import timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 SCHEMA = Path(__file__).with_name("inventory_schema.sql").read_text(encoding="utf-8")
+QUARTERMASTER_CATALOG = json.loads(
+    Path(__file__).with_name("data").joinpath("quartermaster_catalog.json").read_text(encoding="utf-8")
+)
 AREAS = {
     "quartermaster": "Quartermaster",
     "technology-center": "Technology Center",
 }
 DEFAULT_AREA = "technology-center"
 LOCAL_TIME = ZoneInfo("America/New_York")
+
+
+def find_quartermaster_items(query, category):
+    terms = query.casefold().split()
+    for item in QUARTERMASTER_CATALOG["items"]:
+        if category and item["category"] != category:
+            continue
+        description = f'{item["category"]} {item["name"]}'.casefold()
+        matches = [
+            variant for variant in item["variants"]
+            if all(term in f'{description} {variant["label"].casefold()}' for term in terms)
+        ]
+        if matches:
+            yield {**item, "variants": matches}
 
 
 def initialize_schema(db):

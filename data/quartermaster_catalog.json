@@ -1,0 +1,4826 @@
+{
+  "items": [
+    {
+      "category": "Badges & insignia",
+      "name": "2 Leaf (Large)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J177"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "2 Leaf (Small)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J176"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "2 Star (Large)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J171"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "2 Star (Small)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J170"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "3 Leaf (Large)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J175"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "3 Leaf (Small)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J174"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "3 Star (Large)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J169"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "3 Star (Small)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J168"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "4 Leaf (Large)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J173"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "4 Leaf (Small)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J172"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "4 Star (Large)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J167"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "4 Star (Small)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J166"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Award Pin (Blue/Orange)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J186"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Award Pin (Blue/White/Blue)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J187"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Captain Bars - Black Colored",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "J162"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "J163"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Captain Bars - Brass Colored",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "J160"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "J161"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Collar Pins (State for Class A uniforms)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J148"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Collar Pins (State for Deputy uniforms)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J147"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Court Security Badge",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J131"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "CSO / SPO Badge",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J132"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Lieutenant Chevrons - Black Colored",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "J158"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "J159"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Lieutenant Chevrons - Brass Colored",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "J156"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "J157"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Name Tags",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J151"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Retired City Badge - Deputy",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J141"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Retired State Badge - Captain",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J145"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Retired State Badge - Deputy",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J142"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Retired State Badge - Lieutenant",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J144"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Retired State Badge - Major",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J146"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Retired State Badge - Sergeant",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J143"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Sergeant Chevrons - Black Colored",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "J154"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "J155"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Sergeant Chevrons - Brass Colored",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "J152"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "J153"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "State Badge - Assistant Sheriff",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J138"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "State Badge - Captain",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J136"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "State Badge - Chaplain",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J140"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "State Badge - Deputy",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J133"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "State Badge - Lieutenant",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J135"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "State Badge - Major",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J137"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "State Badge - Sergeant",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J134"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "State Badge - Sheriff",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J139"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Tie Clip (Mens)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J149"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Badges & insignia",
+      "name": "Tie Clip (Womens)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J150"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Asp/Baton/Monadnock",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J25",
+            "B90"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Asp/Baton/Monadnock Holder (hard)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J26",
+            "B74"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Asp/Baton/Monadnock Holder (soft)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J27",
+            "B75"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Duty Belt - Condor LCS Belt",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J24"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Duty Belt - Inner",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J23",
+            "B73"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Duty Belt - Outer",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J22",
+            "B72"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Flashlight - Streamlight \"A\"",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J28"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Flashlight - Streamlight \"B\"",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J29"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Flashlight Charger",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J31",
+            "B93"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Flashlight Holder",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J30",
+            "B76"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Glove Holder",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J32"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Gun Holster - Left Handed",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B78"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Gun Holster - Left-Handed - Safariland 6120",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J38"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Gun Holster - Left-Handed - Safariland 6360",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J39"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Gun Holster - Left-Handed - Safariland 7360",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J40"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Gun Holster - Left-Handed - Uncle Mike's",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J41"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Gun Holster - Right Handed",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B77"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Gun Holster - Right-Handed - Safariland 6120",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J33"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Gun Holster - Right-Handed - Safariland 6360",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J34"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Gun Holster - Right-Handed - Safariland 7360",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J35"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Gun Holster - Right-Handed - Safariland 7362",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J36"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Gun Holster - Right-Handed - Uncle Mike's",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J37"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Handcuffs",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J42",
+            "B94"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Handcuffs Case",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B79"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Handcuffs Case w/Flap",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J43"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Handcuffs Case w/o Flap",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J44"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Mace",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J45",
+            "B95"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Mace Holder",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J46",
+            "B81"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Magazine Pouch",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J47",
+            "B80"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Radio Holder",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J48",
+            "B82"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Tourniquet",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J49",
+            "B96"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Duty belt gear",
+      "name": "Tourniquet Pouch",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J50",
+            "B83"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Equipment",
+      "name": "Flashlight",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B91"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Equipment",
+      "name": "Flashlight Battery",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B92"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Headwear",
+      "name": "Black BCSO Baseball Cap",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J5",
+            "B39"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Headwear",
+      "name": "Black BCSO Winter Skull Cap",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J11",
+            "B40"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Headwear",
+      "name": "Blue \"BCSO Range Instructor\" Baseball Caps",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J8",
+            "B47"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Headwear",
+      "name": "Blue \"BCSO Range Master\" Baseball Caps",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J9",
+            "B48"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Headwear",
+      "name": "Blue \"Range Instructor\" Baseball Caps",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J10",
+            "B49"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Headwear",
+      "name": "Brown Bus Driver Caps",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J13",
+            "B50"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Headwear",
+      "name": "Brown Winter Trooper Hat (Ushanka)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J14",
+            "B51"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Headwear",
+      "name": "Cold Weather Stetson (Felt)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J3",
+            "B41"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Headwear",
+      "name": "Plastic Cover for Felt Stetsons",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B43"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Headwear",
+      "name": "Plastic Covers for Stetsons",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "J15"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "J16"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "J17"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "J18"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Headwear",
+      "name": "TDU Green BCSO Baseball Caps - Black Embroidery",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J6",
+            "B44"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Headwear",
+      "name": "TDU Green BCSO Baseball Caps - Gold Embroidery",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J7",
+            "B45"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Headwear",
+      "name": "TDU Green BCSO Winter Skull Cap",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J12",
+            "B46"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Headwear",
+      "name": "Warm Weather Stetson (Straw)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J4",
+            "B42"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Outerwear",
+      "name": "Black Blauer 3-in-1 SPO Winter Jacket w/CSO Patch",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "J64"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "J65"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "J66"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "J67"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "J68"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "J69"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "J70"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "J71"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Outerwear",
+      "name": "Black Deputy Sheriff Windbreaker / \"Bohler\" Jacket",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "J73",
+            "B60"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "J74"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "J75"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "J76"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "J77"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "J78"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "J79"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "J80"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Outerwear",
+      "name": "Brown 3-in-1 Winter Sheriff’s Jacket",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "J82",
+            "B61"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "J83"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "J84"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "J85"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "J86"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "J87"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "J88"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "J89"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Outerwear",
+      "name": "Newer Black Blauer 3-in-1 Winter Jacket/Liner w Brown Patches",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B56"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Outerwear",
+      "name": "Older Black 3-in-1 Winter Jacket/Liner w Brown Patches",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B58"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Outerwear",
+      "name": "Older Black 3-in-1 Winter Jacket/liner w Olive Patches",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B59"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Outerwear",
+      "name": "Older Brown 3-in-1 Winter Jacket/Liner w Brown Patches",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B57"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Outerwear",
+      "name": "Olive Tactical Jacket",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B62"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Outerwear",
+      "name": "Raincoat - Reversible Black/Yellow",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "J101",
+            "B64"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "J102"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "J103"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "J104"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "J105"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "J106"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "J107"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "J108"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Outerwear",
+      "name": "Raincoat - Yellow",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "J110",
+            "B63"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "J111"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "J112"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "J113"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "J114"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "J115"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "J116"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "J117"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Outerwear",
+      "name": "TDU Green 3-in-1 Deputy Sheriff Jacket w/Brown Deputy Patch",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "J55"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "J56"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "J57"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "J58"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "J59"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "J60"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "J61"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "J62"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Outerwear",
+      "name": "TDU Green Tactical Jacket (old model)",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "J91"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "J92"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "J93"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "J94"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "J95"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "J96"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "J97"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "J98"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Outerwear",
+      "name": "Yellow Safety Vests",
+      "variants": [
+        {
+          "label": "Small-Medium",
+          "source": [
+            "J119",
+            "B65"
+          ]
+        },
+        {
+          "label": "Large - XL",
+          "source": [
+            "J120"
+          ]
+        },
+        {
+          "label": "2XL - 3XL",
+          "source": [
+            "J121"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Patches & accessories",
+      "name": "Black 75th Anniversary Conference Computer Bag",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B119"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Patches & accessories",
+      "name": "Black BCSO Computer Bag",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B118"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Patches & accessories",
+      "name": "Black Computer Bag (Plain)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B120"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Patches & accessories",
+      "name": "Brown BCSO \"Cadet\" for garments",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B126"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Patches & accessories",
+      "name": "Brown BCSO \"regular\" for garments",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B123"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Patches & accessories",
+      "name": "Brown BCSO \"regular\" for garments (Velcro Bottom)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B124"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Patches & accessories",
+      "name": "Brown BCSO \"SPO\" for garments",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B125"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Patches & accessories",
+      "name": "Olive \"New BCSO Circular\" SOD Patches (Sew-On)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B129"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Patches & accessories",
+      "name": "Olive \"New BCSO Circular\" SOD Patches (Velcro Bottom)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B130"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Patches & accessories",
+      "name": "Olive Traditional BCSO SOD Patches (Sew-on)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B127"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Patches & accessories",
+      "name": "Olive Traditional BCSO SOD Patches (Velcro Bottom)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B128"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Patches & accessories",
+      "name": "Olive/Black Sergeant Chevrons for LS Shirts & Jackets",
+      "variants": [
+        {
+          "label": "Large",
+          "source": [
+            "B136"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Patches & accessories",
+      "name": "Olive/Black Sergeant Chevrons for SS Shirts",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "B135"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Patches & accessories",
+      "name": "Orange \"OIC\" straps",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B146"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Patches & accessories",
+      "name": "Yellow/Beige Sergeant Chevrons for LS Shirts & Jackets",
+      "variants": [
+        {
+          "label": "Large",
+          "source": [
+            "B132"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Patches & accessories",
+      "name": "Yellow/Beige Sergeant Chevrons for SS Shirts",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "B131"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Patches & accessories",
+      "name": "Yellow/Brown Sergeant Chevrons for LS Shirts & Jackets",
+      "variants": [
+        {
+          "label": "Large",
+          "source": [
+            "B134"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Patches & accessories",
+      "name": "Yellow/Brown Sergeant Chevrons for SS Shirts",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "B133"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Supplies",
+      "name": "Clorox Bleach",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B115"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Supplies",
+      "name": "Disinfectant Wipes",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B111"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Supplies",
+      "name": "Face Masks",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B113"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Supplies",
+      "name": "Gloves (Nylon)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B110"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Supplies",
+      "name": "Hand Sanitizer",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B112"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Supplies",
+      "name": "Neosporin Packets",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B114"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Black BCSO Sweater — Men’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G387"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G388"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G389"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G390"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G391"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G392"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G393"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G394"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Black Performance Polo - Long-Sleeved",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B21"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Black Performance Polo - Short-Sleeved",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B20"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Black Tactical Pants (BDU)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B19"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Black Tactical Polo - Long-Sleeved",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B22"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Blue BCSO Civilian Long-Sleeved Polo Shirt — Men’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G405",
+            "B27"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G406"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G407"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G408"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G409"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G410"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G411"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G412"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Blue BCSO Civilian Short-Sleeved Polo Shirt — Men’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G396",
+            "B26"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G397"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G398"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G399"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G400"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G401"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G402"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G403"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Blue BCSO Civilian Sweater — Men’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G367",
+            "B25"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G368"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G369"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G370"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G371"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G372"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G373"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G374"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Blue Range Instructor Long-Sleeved Polo",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B28"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Blue Range Instructor Short-Sleeved Polo",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B29"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Brown \"Class A\" Blouse Coat — Men’s",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "G3",
+            "E3",
+            "B12"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Brown \"Class A\" Blouse Coat — Women’s",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "G4",
+            "B12"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Brown \"Class A\" Fechheimer Pants",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "E4"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Brown BCSO Deputy Sheriff Sweater — Men’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G377"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G378"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G379"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G380"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G381"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G382"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G383"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G384"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Brown Class A Pants",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B13"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Brown Deputy Pants",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B3"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Brown Necktie",
+      "variants": [
+        {
+          "label": "18 (Short)",
+          "source": [
+            "G415",
+            "B30"
+          ]
+        },
+        {
+          "label": "20 (Medium)",
+          "source": [
+            "G416",
+            "B31"
+          ]
+        },
+        {
+          "label": "22 (Long)",
+          "source": [
+            "G417",
+            "B32"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Brown Traditional \"Class B\" Fechheimer Pants — Men’s",
+      "variants": [
+        {
+          "label": "Waist 28 Unhemmed",
+          "source": [
+            "G316",
+            "E316"
+          ]
+        },
+        {
+          "label": "Waist 28 - Length 28",
+          "source": [
+            "G317",
+            "E317"
+          ]
+        },
+        {
+          "label": "Waist 28 - Length 29",
+          "source": [
+            "G318",
+            "E318"
+          ]
+        },
+        {
+          "label": "Waist 28 - Length 30",
+          "source": [
+            "G319",
+            "E319"
+          ]
+        },
+        {
+          "label": "Waist 28 - Length 31",
+          "source": [
+            "G320",
+            "E320"
+          ]
+        },
+        {
+          "label": "Waist 28 - Length 32",
+          "source": [
+            "G321",
+            "E321"
+          ]
+        },
+        {
+          "label": "Waist 28 - Length 33",
+          "source": [
+            "G322",
+            "E322"
+          ]
+        },
+        {
+          "label": "Waist 28 - Length 34",
+          "source": [
+            "G323",
+            "E323"
+          ]
+        },
+        {
+          "label": "Waist 28 - Length 35",
+          "source": [
+            "G324",
+            "E324"
+          ]
+        },
+        {
+          "label": "Waist 28 - Length 36",
+          "source": [
+            "G325",
+            "E325"
+          ]
+        },
+        {
+          "label": "Waist 29 Unhemmed",
+          "source": [
+            "G326",
+            "E326"
+          ]
+        },
+        {
+          "label": "Waist 29 - Length 28",
+          "source": [
+            "G327",
+            "E327"
+          ]
+        },
+        {
+          "label": "Waist 29 - Length 29",
+          "source": [
+            "G328",
+            "E328"
+          ]
+        },
+        {
+          "label": "Waist 29 - Length 30",
+          "source": [
+            "G329",
+            "E329"
+          ]
+        },
+        {
+          "label": "Waist 29 - Length 31",
+          "source": [
+            "G330",
+            "E330"
+          ]
+        },
+        {
+          "label": "Waist 29 - Length 32",
+          "source": [
+            "G331",
+            "E331"
+          ]
+        },
+        {
+          "label": "Waist 29 - Length 33",
+          "source": [
+            "G332",
+            "E332"
+          ]
+        },
+        {
+          "label": "Waist 29 - Length 34",
+          "source": [
+            "G333",
+            "E333"
+          ]
+        },
+        {
+          "label": "Waist 29 - Length 35",
+          "source": [
+            "G334",
+            "E334"
+          ]
+        },
+        {
+          "label": "Waist 29 - Length 36",
+          "source": [
+            "G335",
+            "E335"
+          ]
+        },
+        {
+          "label": "Waist 30 Unhemmed",
+          "source": [
+            "G336",
+            "E336"
+          ]
+        },
+        {
+          "label": "Waist 30 - Length 28",
+          "source": [
+            "G337",
+            "E337"
+          ]
+        },
+        {
+          "label": "Waist 30 - Length 29",
+          "source": [
+            "G338",
+            "E338"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Coyote Brown \"Class C\" BDU Pants — Men’s",
+      "variants": [
+        {
+          "label": "Size 28 X 28",
+          "source": [
+            "G342",
+            "E342"
+          ]
+        },
+        {
+          "label": "Size 28 X 30",
+          "source": [
+            "G343",
+            "E343"
+          ]
+        },
+        {
+          "label": "Size 28 X 32",
+          "source": [
+            "G344",
+            "E344"
+          ]
+        },
+        {
+          "label": "Size 28 X 34",
+          "source": [
+            "G345",
+            "E345"
+          ]
+        },
+        {
+          "label": "Size 28 X 36",
+          "source": [
+            "G346",
+            "E346"
+          ]
+        },
+        {
+          "label": "Size 30 X 28",
+          "source": [
+            "G347",
+            "E347"
+          ]
+        },
+        {
+          "label": "Size 30 X 30",
+          "source": [
+            "G348",
+            "E348"
+          ]
+        },
+        {
+          "label": "Size 30 X 32",
+          "source": [
+            "G349",
+            "E349"
+          ]
+        },
+        {
+          "label": "Size 30 X 34",
+          "source": [
+            "G350",
+            "E350"
+          ]
+        },
+        {
+          "label": "Size 30 X 36",
+          "source": [
+            "G351",
+            "E351"
+          ]
+        },
+        {
+          "label": "Size 32 X 28",
+          "source": [
+            "G352",
+            "E352"
+          ]
+        },
+        {
+          "label": "Size 32 X 30",
+          "source": [
+            "G353",
+            "E353"
+          ]
+        },
+        {
+          "label": "Size 32 X 32",
+          "source": [
+            "G354",
+            "E354"
+          ]
+        },
+        {
+          "label": "Size 32 X 34",
+          "source": [
+            "G355",
+            "E355"
+          ]
+        },
+        {
+          "label": "Size 32 X 36",
+          "source": [
+            "G356",
+            "E356"
+          ]
+        },
+        {
+          "label": "Size 34 X 28",
+          "source": [
+            "G357",
+            "E357"
+          ]
+        },
+        {
+          "label": "Size 34 X 30",
+          "source": [
+            "G358",
+            "E358"
+          ]
+        },
+        {
+          "label": "Size 34 X 32",
+          "source": [
+            "G359",
+            "E359"
+          ]
+        },
+        {
+          "label": "Size 34 X 34",
+          "source": [
+            "G360",
+            "E360"
+          ]
+        },
+        {
+          "label": "Size 34 X 36",
+          "source": [
+            "G361",
+            "E361"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "CSO Black \"Class C\" Long-Sleeved Polo Shirt — Men’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G292",
+            "E292"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G293",
+            "E293"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G294",
+            "E294"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G295",
+            "E295"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G296",
+            "E296"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G297",
+            "E297"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G298",
+            "E298"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G299",
+            "E299"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "CSO Black \"Class C\" Long-Sleeved Polo Shirt — Women’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G302",
+            "E302"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G303",
+            "E303"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G304",
+            "E304"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G305",
+            "E305"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G306",
+            "E306"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G307",
+            "E307"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G308",
+            "E308"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G309",
+            "E309"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "CSO Black \"Class C\" Short-Sleeved Polo Shirt — Men’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G271",
+            "E271"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G272",
+            "E272"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G273",
+            "E273"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G274",
+            "E274"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G275",
+            "E275"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G276",
+            "E276"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G277",
+            "E277"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G278",
+            "E278"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "CSO Black \"Class C\" Short-Sleeved Polo Shirt — Women’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G281",
+            "E281"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G282",
+            "E282"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G283",
+            "E283"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G284",
+            "E284"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G285",
+            "E285"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G286",
+            "E286"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G287",
+            "E287"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G288",
+            "E288"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Deputy Beige - Long-Sleeved Shirt - Men's",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B6"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Deputy Beige - Long-Sleeved Shirt - Women's",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B7"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Deputy Beige - Short-Sleeved Shirt - Men's",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B4"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Deputy Beige - Short-Sleeved Shirt - Women's",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B5"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Deputy White - Long-Sleeved Shirt - Men's",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B10"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Deputy White - Long-Sleeved Shirt - Women's",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B11"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Deputy White - Short-Sleeved Shirt - Men's",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B8"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Deputy White - Short-Sleeved Shirt - Women's",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B9"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "SOD Black \"Class C\" Long-Sleeved Shirt — Men’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G181",
+            "E181"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G182",
+            "E182"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G183",
+            "E183"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G184",
+            "E184"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G185",
+            "E185"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G186",
+            "E186"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G187",
+            "E187"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G188",
+            "E188"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "SOD Black \"Class C\" Long-Sleeved Shirt — Women’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G191",
+            "E191"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G192",
+            "E192"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G193",
+            "E193"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G194",
+            "E194"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G195",
+            "E195"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G196",
+            "E196"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G197",
+            "E197"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G198",
+            "E198"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "SOD Black \"Class C\" Long-Sleeved Tactical Shirt — Men’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G202",
+            "E202"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G203",
+            "E203"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G204",
+            "E204"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G205",
+            "E205"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G206",
+            "E206"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G207",
+            "E207"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G208",
+            "E208"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G209",
+            "E209"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "SOD Black \"Class C\" Long-Sleeved Tactical Shirt — Women’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G213",
+            "E213"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G214",
+            "E214"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G215",
+            "E215"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G216",
+            "E216"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G217",
+            "E217"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G218",
+            "E218"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G219",
+            "E219"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G220",
+            "E220"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "SOD Black \"Class C\" Short-Sleeved Polo Shirt — Men’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G160",
+            "E160"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G161",
+            "E161"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G162",
+            "E162"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G163",
+            "E163"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G164",
+            "E164"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G165",
+            "E165"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G166",
+            "E166"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G167",
+            "E167"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "SOD Black \"Class C\" Short-Sleeved Polo Shirt — Women’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G171",
+            "E171"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G172",
+            "E172"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G173",
+            "E173"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G174",
+            "E174"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G175",
+            "E175"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G176",
+            "E176"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G177",
+            "E177"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G178",
+            "E178"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "SPO Black \"Class C\" Long-Sleeved Polo Shirt — Men’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G247",
+            "E247"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G248",
+            "E248"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G249",
+            "E249"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G250",
+            "E250"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G251",
+            "E251"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G252",
+            "E252"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G253",
+            "E253"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G254",
+            "E254"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "SPO Black \"Class C\" Long-Sleeved Polo Shirt — Women’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G258",
+            "E258"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G259",
+            "E259"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G260",
+            "E260"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G261",
+            "E261"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G262",
+            "E262"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G263",
+            "E263"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G264",
+            "E264"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G265",
+            "E265"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "SPO Black \"Class C\" Short-Sleeved Polo Shirt — Men’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G226",
+            "E226"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G227",
+            "E227"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G228",
+            "E228"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G229",
+            "E229"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G230",
+            "E230"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G231",
+            "E231"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G232",
+            "E232"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G233",
+            "E233"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "SPO Black \"Class C\" Short-Sleeved Polo Shirt — Women’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G236",
+            "E236"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G237",
+            "E237"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G238",
+            "E238"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G239",
+            "E239"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G240",
+            "E240"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G241",
+            "E241"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G242",
+            "E242"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G243",
+            "E243"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Sweater - Black w/Tactical Patches",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B36"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Sweater - Brown w/Regular Patches",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B35"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Tan Traditional \"Class B\" Long-Sleeved Shirt — Men’s",
+      "variants": [
+        {
+          "label": "Size 15 - Sleeve 32-33",
+          "source": [
+            "G37",
+            "E37"
+          ]
+        },
+        {
+          "label": "Size 15 - Sleeve 34-35",
+          "source": [
+            "G38",
+            "E38"
+          ]
+        },
+        {
+          "label": "Size 15 - Sleeve 36-37",
+          "source": [
+            "G39",
+            "E39"
+          ]
+        },
+        {
+          "label": "Size 15 - Sleeve 38-39",
+          "source": [
+            "G40",
+            "E40"
+          ]
+        },
+        {
+          "label": "Size 15.5 - Sleeve 32-33",
+          "source": [
+            "G41",
+            "E41"
+          ]
+        },
+        {
+          "label": "Size 15.5 - Sleeve 34-35",
+          "source": [
+            "G42",
+            "E42"
+          ]
+        },
+        {
+          "label": "Size 15.5 - Sleeve 36-37",
+          "source": [
+            "G43",
+            "E43"
+          ]
+        },
+        {
+          "label": "Size 15.5 - Sleeve 38-39",
+          "source": [
+            "G44",
+            "E44"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Tan Traditional \"Class B\" Long-Sleeved Shirt — Women’s",
+      "variants": [
+        {
+          "label": "Size 28",
+          "source": [
+            "G48",
+            "E48"
+          ]
+        },
+        {
+          "label": "Size 30",
+          "source": [
+            "G49",
+            "E49"
+          ]
+        },
+        {
+          "label": "Size 32",
+          "source": [
+            "G50",
+            "E50"
+          ]
+        },
+        {
+          "label": "Size 34",
+          "source": [
+            "G51",
+            "E51"
+          ]
+        },
+        {
+          "label": "Size 36",
+          "source": [
+            "G52",
+            "E52"
+          ]
+        },
+        {
+          "label": "Size 38",
+          "source": [
+            "G53",
+            "E53"
+          ]
+        },
+        {
+          "label": "Size 40",
+          "source": [
+            "G54",
+            "E54"
+          ]
+        },
+        {
+          "label": "Size 42",
+          "source": [
+            "G55",
+            "E55"
+          ]
+        },
+        {
+          "label": "Size 44",
+          "source": [
+            "G56",
+            "E56"
+          ]
+        },
+        {
+          "label": "Size 46",
+          "source": [
+            "G57",
+            "E57"
+          ]
+        },
+        {
+          "label": "Size 48",
+          "source": [
+            "G58",
+            "E58"
+          ]
+        },
+        {
+          "label": "Size 50",
+          "source": [
+            "G59",
+            "E59"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Tan Traditional \"Class B\" Short-Sleeved Shirt — Men’s",
+      "variants": [
+        {
+          "label": "Size 15",
+          "source": [
+            "G9",
+            "E9"
+          ]
+        },
+        {
+          "label": "Size 15.5",
+          "source": [
+            "G10",
+            "E10"
+          ]
+        },
+        {
+          "label": "Size 16",
+          "source": [
+            "G11",
+            "E11"
+          ]
+        },
+        {
+          "label": "Size 16.5",
+          "source": [
+            "G12",
+            "E12"
+          ]
+        },
+        {
+          "label": "Size 17",
+          "source": [
+            "G13",
+            "E13"
+          ]
+        },
+        {
+          "label": "Size 17.5",
+          "source": [
+            "G14",
+            "E14"
+          ]
+        },
+        {
+          "label": "Size 18",
+          "source": [
+            "G15",
+            "E15"
+          ]
+        },
+        {
+          "label": "Size 18.5",
+          "source": [
+            "G16",
+            "E16"
+          ]
+        },
+        {
+          "label": "Size 19",
+          "source": [
+            "G17",
+            "E17"
+          ]
+        },
+        {
+          "label": "Size 19.5",
+          "source": [
+            "G18",
+            "E18"
+          ]
+        },
+        {
+          "label": "Size 20",
+          "source": [
+            "G19",
+            "E19"
+          ]
+        },
+        {
+          "label": "Size 20.5",
+          "source": [
+            "G20",
+            "E20"
+          ]
+        },
+        {
+          "label": "Size 21",
+          "source": [
+            "G21",
+            "E21"
+          ]
+        },
+        {
+          "label": "Size 22",
+          "source": [
+            "G22",
+            "E22"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "Tan Traditional \"Class B\" Short-Sleeved Shirt — Women’s",
+      "variants": [
+        {
+          "label": "Size 28",
+          "source": [
+            "G24",
+            "E24"
+          ]
+        },
+        {
+          "label": "Size 30",
+          "source": [
+            "G25",
+            "E25"
+          ]
+        },
+        {
+          "label": "Size 32",
+          "source": [
+            "G26",
+            "E26"
+          ]
+        },
+        {
+          "label": "Size 34",
+          "source": [
+            "G27",
+            "E27"
+          ]
+        },
+        {
+          "label": "Size 36",
+          "source": [
+            "G28",
+            "E28"
+          ]
+        },
+        {
+          "label": "Size 38",
+          "source": [
+            "G29",
+            "E29"
+          ]
+        },
+        {
+          "label": "Size 40",
+          "source": [
+            "G30",
+            "E30"
+          ]
+        },
+        {
+          "label": "Size 42",
+          "source": [
+            "G31",
+            "E31"
+          ]
+        },
+        {
+          "label": "Size 44",
+          "source": [
+            "G32",
+            "E32"
+          ]
+        },
+        {
+          "label": "Size 46",
+          "source": [
+            "G33",
+            "E33"
+          ]
+        },
+        {
+          "label": "Size 48",
+          "source": [
+            "G34",
+            "E34"
+          ]
+        },
+        {
+          "label": "Size 50",
+          "source": [
+            "G35",
+            "E35"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "TDU Green \"Class C\" Long-Sleeved Polo Shirt — Men’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G138",
+            "E138"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G139",
+            "E139"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G140",
+            "E140"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G141",
+            "E141"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G142",
+            "E142"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G143",
+            "E143"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G144",
+            "E144"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G145",
+            "E145"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "TDU Green \"Class C\" Long-Sleeved Polo Shirt — Women’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G148",
+            "E148"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G149",
+            "E149"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G150",
+            "E150"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G151",
+            "E151"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G152",
+            "E152"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G153",
+            "E153"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G154",
+            "E154"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G155",
+            "E155"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "TDU Green \"Class C\" Short-Sleeved Polo Shirt — Men’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G118",
+            "E118"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G119",
+            "E119"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G120",
+            "E120"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G121",
+            "E121"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G122",
+            "E122"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G123",
+            "E123"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G124",
+            "E124"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G125",
+            "E125"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "TDU Green \"Class C\" Short-Sleeved Polo Shirt — Women’s",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G128",
+            "E128"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G129",
+            "E129"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G130",
+            "E130"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G131",
+            "E131"
+          ]
+        },
+        {
+          "label": "2XL",
+          "source": [
+            "G132",
+            "E132"
+          ]
+        },
+        {
+          "label": "3XL",
+          "source": [
+            "G133",
+            "E133"
+          ]
+        },
+        {
+          "label": "4XL",
+          "source": [
+            "G134",
+            "E134"
+          ]
+        },
+        {
+          "label": "5XL",
+          "source": [
+            "G135",
+            "E135"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "TDU Green Performance Polo - Long Sleeved",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B17"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "TDU Green Performance Polo - Short Sleeved",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B16"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "TDU Green Tactical Pants (BDU)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "B15"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "White Parade Gloves",
+      "variants": [
+        {
+          "label": "Small",
+          "source": [
+            "G419",
+            "B34"
+          ]
+        },
+        {
+          "label": "Medium",
+          "source": [
+            "G420"
+          ]
+        },
+        {
+          "label": "Large",
+          "source": [
+            "G421"
+          ]
+        },
+        {
+          "label": "XL",
+          "source": [
+            "G422"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "White Traditional \"Class B\" Long-Sleeved Shirt — Men’s",
+      "variants": [
+        {
+          "label": "Size 15 - Sleeve 32-33",
+          "source": [
+            "G92",
+            "E92"
+          ]
+        },
+        {
+          "label": "Size 15 - Sleeve 34-35",
+          "source": [
+            "G93",
+            "E93"
+          ]
+        },
+        {
+          "label": "Size 15 - Sleeve 36-37",
+          "source": [
+            "G94",
+            "E94"
+          ]
+        },
+        {
+          "label": "Size 15 - Sleeve 38-39",
+          "source": [
+            "G95",
+            "E95"
+          ]
+        },
+        {
+          "label": "Size 15.5 - Sleeve 32-33",
+          "source": [
+            "G96",
+            "E96"
+          ]
+        },
+        {
+          "label": "Size 15.5 - Sleeve 34-35",
+          "source": [
+            "G97",
+            "E97"
+          ]
+        },
+        {
+          "label": "Size 15.5 - Sleeve 36-37",
+          "source": [
+            "G98",
+            "E98"
+          ]
+        },
+        {
+          "label": "Size 15.5 - Sleeve 38-39",
+          "source": [
+            "G99",
+            "E99"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "White Traditional \"Class B\" Long-Sleeved Shirt — Women’s",
+      "variants": [
+        {
+          "label": "Size 28",
+          "source": [
+            "G103",
+            "E103"
+          ]
+        },
+        {
+          "label": "Size 30",
+          "source": [
+            "G104",
+            "E104"
+          ]
+        },
+        {
+          "label": "Size 32",
+          "source": [
+            "G105",
+            "E105"
+          ]
+        },
+        {
+          "label": "Size 34",
+          "source": [
+            "G106",
+            "E106"
+          ]
+        },
+        {
+          "label": "Size 36",
+          "source": [
+            "G107",
+            "E107"
+          ]
+        },
+        {
+          "label": "Size 38",
+          "source": [
+            "G108",
+            "E108"
+          ]
+        },
+        {
+          "label": "Size 40",
+          "source": [
+            "G109",
+            "E109"
+          ]
+        },
+        {
+          "label": "Size 42",
+          "source": [
+            "G110",
+            "E110"
+          ]
+        },
+        {
+          "label": "Size 44",
+          "source": [
+            "G111",
+            "E111"
+          ]
+        },
+        {
+          "label": "Size 46",
+          "source": [
+            "G112",
+            "E112"
+          ]
+        },
+        {
+          "label": "Size 48",
+          "source": [
+            "G113",
+            "E113"
+          ]
+        },
+        {
+          "label": "Size 50",
+          "source": [
+            "G114",
+            "E114"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "White Traditional \"Class B\" Short-Sleeved Shirt — Men’s",
+      "variants": [
+        {
+          "label": "Size 15",
+          "source": [
+            "G64",
+            "E64"
+          ]
+        },
+        {
+          "label": "Size 15.5",
+          "source": [
+            "G65",
+            "E65"
+          ]
+        },
+        {
+          "label": "Size 16",
+          "source": [
+            "G66",
+            "E66"
+          ]
+        },
+        {
+          "label": "Size 16.5",
+          "source": [
+            "G67",
+            "E67"
+          ]
+        },
+        {
+          "label": "Size 17",
+          "source": [
+            "G68",
+            "E68"
+          ]
+        },
+        {
+          "label": "Size 17.5",
+          "source": [
+            "G69",
+            "E69"
+          ]
+        },
+        {
+          "label": "Size 18",
+          "source": [
+            "G70",
+            "E70"
+          ]
+        },
+        {
+          "label": "Size 18.5",
+          "source": [
+            "G71",
+            "E71"
+          ]
+        },
+        {
+          "label": "Size 19",
+          "source": [
+            "G72",
+            "E72"
+          ]
+        },
+        {
+          "label": "Size 19.5",
+          "source": [
+            "G73",
+            "E73"
+          ]
+        },
+        {
+          "label": "Size 20",
+          "source": [
+            "G74",
+            "E74"
+          ]
+        },
+        {
+          "label": "Size 20.5",
+          "source": [
+            "G75",
+            "E75"
+          ]
+        },
+        {
+          "label": "Size 21",
+          "source": [
+            "G76",
+            "E76"
+          ]
+        },
+        {
+          "label": "Size 22",
+          "source": [
+            "G77",
+            "E77"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Uniforms",
+      "name": "White Traditional \"Class B\" Short-Sleeved Shirt — Women’s",
+      "variants": [
+        {
+          "label": "Size 28",
+          "source": [
+            "G79",
+            "E79"
+          ]
+        },
+        {
+          "label": "Size 30",
+          "source": [
+            "G80",
+            "E80"
+          ]
+        },
+        {
+          "label": "Size 32",
+          "source": [
+            "G81",
+            "E81"
+          ]
+        },
+        {
+          "label": "Size 34",
+          "source": [
+            "G82",
+            "E82"
+          ]
+        },
+        {
+          "label": "Size 36",
+          "source": [
+            "G83",
+            "E83"
+          ]
+        },
+        {
+          "label": "Size 38",
+          "source": [
+            "G84",
+            "E84"
+          ]
+        },
+        {
+          "label": "Size 40",
+          "source": [
+            "G85",
+            "E85"
+          ]
+        },
+        {
+          "label": "Size 42",
+          "source": [
+            "G86",
+            "E86"
+          ]
+        },
+        {
+          "label": "Size 44",
+          "source": [
+            "G87",
+            "E87"
+          ]
+        },
+        {
+          "label": "Size 46",
+          "source": [
+            "G88",
+            "E88"
+          ]
+        },
+        {
+          "label": "Size 48",
+          "source": [
+            "G89",
+            "E89"
+          ]
+        },
+        {
+          "label": "Size 50",
+          "source": [
+            "G90",
+            "E90"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Vests",
+      "name": "Ballistic (Under the Shirt)",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J127"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Vests",
+      "name": "Personalized Outer Carrier",
+      "variants": [
+        {
+          "label": "Unspecified",
+          "source": [
+            "J126"
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "text": "(Additional entries needed to shirt size 22 with all of the available sleeve lengths)",
+      "source": [
+        "E46",
+        "G46"
+      ]
+    },
+    {
+      "text": "White shirts are only for command staff - Typically only ordered upon request",
+      "source": [
+        "E63"
+      ]
+    },
+    {
+      "text": "(Additional entries needed up to shirt size 22 with all 4 available sleeve lengths)",
+      "source": [
+        "E101",
+        "G101"
+      ]
+    },
+    {
+      "text": "Mens style is # 71049 as shown on the side label of the 5.11 shirts)",
+      "source": [
+        "E126",
+        "G126",
+        "E168",
+        "G168"
+      ]
+    },
+    {
+      "text": "Womens style is # 61165 as shown on the side label of the 5.11 shirts)",
+      "source": [
+        "E136",
+        "G136",
+        "E179",
+        "G179"
+      ]
+    },
+    {
+      "text": "Mens style is # 72049 as shown on the side label of the 5.11 shirts)",
+      "source": [
+        "E146",
+        "G146"
+      ]
+    },
+    {
+      "text": "Womens style is # 62408 as shown on the side label of the 5.11 shirts)",
+      "source": [
+        "E156",
+        "G156",
+        "E199",
+        "G199"
+      ]
+    },
+    {
+      "text": "Mens style is # 72049 as shown on the side label of the 5.11 LS shirts",
+      "source": [
+        "E189",
+        "G189"
+      ]
+    },
+    {
+      "text": "Tru-Spec Brand for the SOD Tactical Shirt",
+      "source": [
+        "E210",
+        "G210",
+        "E221",
+        "G221"
+      ]
+    },
+    {
+      "text": "The CSO/SPO - style is the Ufx Tactical polo as shown on the tag of the Elbeco shirts (K5131 on tag - 671245 is shown on the left side label)",
+      "source": [
+        "E234",
+        "G234"
+      ]
+    },
+    {
+      "text": "* * * Will find the model # for the womens black shirts by Elbeco * * *",
+      "source": [
+        "E244",
+        "G244",
+        "E266",
+        "G266",
+        "E289",
+        "G289",
+        "E310",
+        "G310"
+      ]
+    },
+    {
+      "text": "The CSO/SPO - style is the Ufx Tactical polo as shown on the tag of the Elbeco shirts (K5141 on tag - 671251 is shown on the left side label)",
+      "source": [
+        "E255",
+        "G255"
+      ]
+    },
+    {
+      "text": "The CSO Only \" shirt style is the Ufx Tactical polo as shown on the tag of the Elbeco shirts (K5131 on tag - 671245 is shown on the left side label)",
+      "source": [
+        "E279",
+        "G279"
+      ]
+    },
+    {
+      "text": "The CSO Only\" shirt style is the Ufx Tactical polo as shown on the tag of the Elbeco shirts (K5141 on tag - 671251 is shown on the left side label)",
+      "source": [
+        "E300",
+        "G300"
+      ]
+    },
+    {
+      "text": "(Additional entries needed up to waist size 52 with all available lengths)",
+      "source": [
+        "E340",
+        "G340"
+      ]
+    },
+    {
+      "text": "(Additional entries needed up to waist size 52 with all 5 available lengths)",
+      "source": [
+        "E362",
+        "G362"
+      ]
+    },
+    {
+      "text": "Same Pants info will be added for the Black, Blue & TDU Green BDUs",
+      "source": [
+        "E363",
+        "G363"
+      ]
+    },
+    {
+      "text": "Duty belt list is marked for updates in the workbook.",
+      "source": [
+        "J21"
+      ]
+    },
+    {
+      "text": "Unidentified workbook entry: 1",
+      "source": [
+        "B24"
+      ]
+    },
+    {
+      "text": "Unidentified workbook entry: \"Cant Read The Line on the Form\"",
+      "source": [
+        "B116"
+      ]
+    }
+  ]
+}

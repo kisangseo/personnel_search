@@ -734,6 +734,11 @@ def inventory_page():
         app.logger.exception("Could not load inventory")
         return render_template("inventory.html", area=area, areas=inventory.AREAS, error="Inventory is temporarily unavailable."), 503
 
+    catalog_query = request.args.get("q", "").strip()
+    catalog_category = request.args.get("category", "")
+    catalog = inventory.QUARTERMASTER_CATALOG if area == "quartermaster" else None
+    catalog_items = list(inventory.find_quartermaster_items(catalog_query, catalog_category)) if catalog else []
+    catalog_categories = sorted({item["category"] for item in catalog["items"]}) if catalog else []
     active_assignments = {
         entry["device_id"]: entry
         for entries in history.values()
@@ -746,6 +751,8 @@ def inventory_page():
         "inventory.html", area=area, areas=inventory.AREAS, devices=devices, roster=roster, history=history, editing=editing,
         active_assignments=active_assignments, available_devices=available_devices,
         issued_count=len(devices) - len(available_devices), message=messages.get(request.args.get("result")),
+        catalog=catalog, catalog_items=catalog_items, catalog_categories=catalog_categories,
+        catalog_query=catalog_query, catalog_category=catalog_category,
     )
 
 
