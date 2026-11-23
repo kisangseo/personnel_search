@@ -2,13 +2,16 @@ import csv
 import io
 import os
 import re
+from contextlib import closing
 from io import BytesIO
 from difflib import SequenceMatcher
 from typing import Any
 
 import openpyxl
 import pyodbc
-from flask import Flask, jsonify, redirect, render_template, request, url_for
+from flask import Flask, abort, jsonify, redirect, render_template, request, url_for
+
+import inventory
 
 SQL_SERVER_CONN_STR = os.getenv("PERSONNEL_SQL_CONNECTION_STRING", "").strip()
 
@@ -557,6 +560,106 @@ def add_member():
     return redirect(url_for("index"))
 
 
+def selected_inventory_area():
+    area = request.args.get("area", inventory.DEFAULT_AREA)
+    if area not in inventory.AREAS:
+        abort(404)
+    return area
+
+
+@app.get("/inventory")
+def inventory_page():
+    area = selected_inventory_area()
+    try:
+        with closing(get_db()) as db:
+            initialize_inventory(db)
+            devices = db.cursor().execute("""
+                SELECT device_id, device_name, serial_number
+                FROM dbo.inventory_devices WHERE inventory_area = ?
+                ORDER BY device_name, serial_number
+            """, area).fetchall()
+            roster = db.cursor().execute("""
+                SELECT employee_id, name, division FROM dbo.agency_members
+                WHERE NULLIF(LTRIM(RTRIM(name)), '') IS NOT NULL
+                  AND COALESCE(status, '') <> 'Inactive'
+                ORDER BY name, employee_id
+            """).fetchall()
+            history = inventory.fetch_history(db, "device_id", area)
+    except pyodbc.Error:
+        app.logger.exception("Could not load inventory")
+        return render_template("inventory.html", area=area, areas=inventory.AREAS, error="Inventory is temporarily unavailable."), 503
+
+    active_assignments = {
+        entry["device_id"]: entry
+        for entries in history.values()
+        for entry in entries
+        if entry["returned_at"] is None
+    }
+    available_devices = [device for device in devices if device.device_id not in active_assignments]
+    messages = {"added": "Device added.", "issued": "Device issued.", "returned": "Device returned."}
+    return render_template(
+        "inventory.html", area=area, areas=inventory.AREAS, devices=devices, roster=roster, history=history,
+        active_assignments=active_assignments, available_devices=available_devices,
+        issued_count=len(devices) - len(available_devices), message=messages.get(request.args.get("result")),
+    )
+
+
+def initialize_inventory(db):
+    # Supports opening Inventory directly on an empty database.
+    initialize_database(db)
+    inventory.initialize_schema(db)
+
+
+@app.post("/inventory/<action>")
+def change_inventory(action):
+    area = selected_inventory_area()
+    if action not in {"add", "issue", "return"}:
+        abort(404)
+    if request.headers.get("Sec-Fetch-Site") == "cross-site":
+        abort(403)
+
+    try:
+        with closing(get_db()) as db:
+            initialize_inventory(db)
+            if action == "add":
+                name = request.form.get("device_name", "").strip()
+                serial = request.form.get("serial_number", "").strip()
+                if not name or not serial or len(name) > 200 or len(serial) > 150:
+                    raise ValueError("Enter a device name and a valid serial number.")
+                inventory.add_device(db, area, name, serial)
+            else:
+                device_id = request.form.get("device_id", type=int)
+                if not device_id or not 0 < device_id <= 2147483647:
+                    raise ValueError("Select a valid device.")
+                if action == "issue":
+                    recipient_id = request.form.get("recipient_id", "").strip()
+                    issuer_id = request.form.get("issuer_id", "").strip()
+                    if not recipient_id or not issuer_id or max(len(recipient_id), len(issuer_id)) > 50:
+                        raise ValueError("Select a valid recipient and issuer from the personnel roster.")
+                    inventory.issue_device(db, area, device_id, recipient_id, issuer_id)
+                else:
+                    assignment_id = request.form.get("assignment_id", type=int)
+                    if not assignment_id or not 0 < assignment_id <= 2147483647:
+                        raise ValueError("Select a valid assignment.")
+                    inventory.return_device(db, area, device_id, assignment_id)
+            db.commit()
+    except ValueError as exc:
+        return render_template("inventory.html", area=area, areas=inventory.AREAS, error=str(exc)), 400
+    except pyodbc.IntegrityError:
+        message = {
+            "add": "A device with that serial number already exists in this inventory.",
+            "issue": "This device is already issued or the personnel record is unavailable.",
+            "return": "The return could not be recorded.",
+        }[action]
+        return render_template("inventory.html", area=area, areas=inventory.AREAS, error=message), 409
+    except pyodbc.Error:
+        app.logger.exception("Could not update inventory")
+        return render_template("inventory.html", area=area, areas=inventory.AREAS, error="The inventory update could not be completed."), 503
+
+    result = {"add": "added", "issue": "issued", "return": "returned"}[action]
+    return redirect(url_for("inventory_page", area=area, result=result), code=303)
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     import_result = None
@@ -565,6 +668,7 @@ def index():
     divisions: list[str] = []
     rank_options: list[str] = ["Others"]
     ingest_logs: list[str] = []
+    equipment_history = None
 
     search_name = request.values.get("search_name", "").strip()
     search_division = request.values.get("search_division", "").strip()
@@ -588,11 +692,17 @@ def index():
         members = fetch_members(db, search_name=search_name, search_division=search_division, search_radio_id=search_radio_id)
         divisions = fetch_divisions(db)
         rank_options = fetch_rank_options(db)
-        db.close()
+        try:
+            inventory.initialize_schema(db)
+            equipment_history = inventory.fetch_history(db, "employee_id")
+        except pyodbc.Error:
+            app.logger.exception("Could not load personnel equipment history")
+        finally:
+            db.close()
     except Exception as exc:
         db_error = str(exc)
 
-    return render_template("index.html", members=members, import_result=import_result, db_error=db_error, ingest_logs=ingest_logs, pending_approvals=PENDING_APPROVALS, divisions=divisions, division_options=DIVISION_OPTIONS, status_options=STATUS_OPTIONS, rank_options=rank_options, race_options=RACE_OPTIONS, sex_options=SEX_OPTIONS, search_name=search_name, search_division=search_division, search_radio_id=search_radio_id)
+    return render_template("index.html", members=members, equipment_history=equipment_history, import_result=import_result, db_error=db_error, ingest_logs=ingest_logs, pending_approvals=PENDING_APPROVALS, divisions=divisions, division_options=DIVISION_OPTIONS, status_options=STATUS_OPTIONS, rank_options=rank_options, race_options=RACE_OPTIONS, sex_options=SEX_OPTIONS, search_name=search_name, search_division=search_division, search_radio_id=search_radio_id)
 
 
 if __name__ == "__main__":

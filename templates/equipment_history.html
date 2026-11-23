@@ -1,0 +1,34 @@
+{% macro equipment_history(entries, show_recipient=false, show_area=false) %}
+  {% if entries %}
+    <table class="equipment-history" border="1" cellpadding="6" cellspacing="0">
+      <thead>
+        <tr>
+          {% if show_recipient %}<th scope="col">Recipient</th>{% endif %}
+          {% if show_area %}<th scope="col">Inventory</th>{% endif %}
+          <th scope="col">Device</th>
+          <th scope="col">Serial number</th>
+          <th scope="col">Division at issue</th>
+          <th scope="col">Issued by</th>
+          <th scope="col">Issue date</th>
+          <th scope="col">Return date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in entries %}
+          <tr>
+            {% if show_recipient %}<td>{{ entry.recipient or entry.employee_id }}</td>{% endif %}
+            {% if show_area %}<td>{{ entry.inventory_label }}</td>{% endif %}
+            <td>{{ entry.device_name }}</td>
+            <td>{{ entry.serial_number }}</td>
+            <td>{{ entry.division|replace('_', ' ') if entry.division else '—' }}</td>
+            <td>{{ entry.issued_by }}</td>
+            <td>{{ entry.issue_date }}</td>
+            <td>{{ entry.return_date or 'Still issued' }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No equipment has been issued.</p>
+  {% endif %}
+{% endmacro %}
