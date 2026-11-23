@@ -729,6 +729,12 @@ def inventory_page():
                       AND COALESCE(status, '') <> 'Inactive'
                     ORDER BY name, employee_id
                 """).fetchall()
+            quartermaster_roster = []
+            if editing and area == "quartermaster":
+                quartermaster_roster = db.cursor().execute("""
+                    SELECT employee_id, name, division, status
+                    FROM dbo.agency_members ORDER BY name, employee_id
+                """).fetchall()
             history = inventory.fetch_history(db, "device_id", area)
             stock = inventory.quartermaster_stock(db) if area == "quartermaster" else {}
             quartermaster_issued = inventory.quartermaster_history(db, active_only=True) if area == "quartermaster" else []
@@ -755,7 +761,8 @@ def inventory_page():
         issued_count=len(devices) - len(available_devices), message=messages.get(request.args.get("result")),
         catalog=catalog, catalog_items=catalog_items, catalog_categories=catalog_categories,
         catalog_query=catalog_query, catalog_category=catalog_category,
-        stock=stock, quartermaster_issued=quartermaster_issued,
+        stock=stock, quartermaster_issued=quartermaster_issued, quartermaster_roster=quartermaster_roster,
+        stock_variant=request.args.get("stock_variant") if editing else None,
         stock_message=request.args.get("stock_message"), stock_error=request.args.get("stock_error"),
     )
 
@@ -775,6 +782,8 @@ def change_quartermaster_stock():
         area="quartermaster", edit=1, q=request.form.get("q") or None,
         category=request.form.get("category") or None, _anchor="quartermaster-catalog",
     )
+    if action in {"add", "assign"} and variant_id in inventory.CATALOG_VARIANTS:
+        destination.update(stock_variant=variant_id, _anchor=f"stock-{variant_id}")
     try:
         with closing(get_db()) as db:
             initialize_inventory(db)
@@ -795,7 +804,7 @@ def change_quartermaster_stock():
                 else:
                     employee_id = request.form.get("recipient_id", "").strip()
                     if not employee_id or len(employee_id) > 50:
-                        raise ValueError("Select an active person from the roster.")
+                        raise ValueError("Select a person from the roster.")
                     inventory.assign_quartermaster_stock(db, variant_id, quantity, employee_id, g.account.email)
                     message = "Items assigned."
             db.commit()
