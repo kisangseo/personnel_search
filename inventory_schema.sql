@@ -75,3 +75,25 @@ BEGIN
         );
     END;
 END;
+
+IF OBJECT_ID('dbo.technology_import_details', 'U') IS NULL
+BEGIN
+    DECLARE @tech_import_lock INT;
+    EXEC @tech_import_lock = sp_getapplock
+        @Resource = 'personnel_technology_import_schema',
+        @LockMode = 'Exclusive', @LockOwner = 'Transaction';
+    IF @tech_import_lock < 0
+        THROW 50003, 'Could not initialize Technology Center imports.', 1;
+
+    IF OBJECT_ID('dbo.technology_import_details', 'U') IS NULL
+    BEGIN
+        ALTER TABLE dbo.inventory_assignments ALTER COLUMN issued_at DATETIME2 NULL;
+
+        CREATE TABLE dbo.technology_import_details (
+            device_id INT NOT NULL PRIMARY KEY REFERENCES dbo.inventory_devices(device_id),
+            inactive BIT NOT NULL,
+            needs_review BIT NOT NULL,
+            source_json NVARCHAR(MAX) NOT NULL
+        );
+    END;
+END;

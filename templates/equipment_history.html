@@ -25,7 +25,7 @@
             <td>{{ entry.serial_number }}</td>
             <td>{{ entry.division|replace('_', ' ') if entry.division else '—' }}</td>
             <td>{{ entry.issued_by }}</td>
-            <td>{{ entry.issue_date }}</td>
+            <td>{{ entry.issue_date or "Unknown" }}</td>
             <td>{{ entry.return_date or 'Still issued' }}</td>
           </tr>
         {% endfor %}
