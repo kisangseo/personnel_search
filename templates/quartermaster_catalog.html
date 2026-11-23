@@ -3,7 +3,8 @@
     <h2>Quartermaster catalog</h2>
     <span>{{ catalog_items|length }} of {{ catalog["items"]|length }} items</span>
   </div>
-  <p class="catalog-caption">The workbook lists items and sizes. Stock quantities have yet to be recorded for these catalog entries.</p>
+  {% if stock_error %}<p class="notice error" role="alert">{{ stock_error }}</p>{% endif %}
+  {% if stock_message %}<p class="notice" role="status">{{ stock_message }}</p>{% endif %}
   <form class="form-row catalog-filter" method="get" action="{{ url_for('inventory_page') }}#quartermaster-catalog">
     <input type="hidden" name="area" value="quartermaster">
     {% if editing %}<input type="hidden" name="edit" value="1">{% endif %}
@@ -21,17 +22,49 @@
       <a class="button" href="{{ url_for('inventory_page', area=area, edit=1 if editing else none) }}#quartermaster-catalog">Clear</a>
     {% endif %}
   </form>
+  {% if editing and catalog_items %}
+    <form class="form-row catalog-filter" method="post" action="{{ url_for('change_quartermaster_stock') }}">
+      <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+      <input type="hidden" name="q" value="{{ catalog_query }}">
+      <input type="hidden" name="category" value="{{ catalog_category }}">
+      <label>Item and size
+        <select name="variant_id" required>
+          <option value="">Select an item</option>
+          {% for category, items in catalog_items|groupby('category') %}
+            <optgroup label="{{ category }}">
+              {% for item in items %}
+                {% for variant in item.variants %}
+                  <option value="{{ variant.source[0] }}">{{ item.name }}{% if variant.label != 'Unspecified' %} · {{ variant.label }}{% endif %} ({{ stock.get(variant.source[0], 0) }} in stock)</option>
+                {% endfor %}
+              {% endfor %}
+            </optgroup>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Quantity <input type="number" name="quantity" min="1" max="2147483647" step="1" required></label>
+      <label>Assign to
+        <select name="recipient_id">
+          <option value="">Select a person when assigning</option>
+          {% for person in roster %}
+            <option value="{{ person.employee_id }}">{{ person.name }}{% if person.division %} · {{ person.division }}{% endif %} ({{ person.employee_id }})</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button class="primary" name="action" value="add">Add stock</button>
+      <button class="primary" name="action" value="assign">Assign</button>
+    </form>
+  {% endif %}
   {% for category, items in catalog_items|groupby('category') %}
     <details class="catalog-group"{% if catalog_query or catalog_category %} open{% endif %}>
       <summary>{{ category }} <span>({{ items|length }})</span></summary>
       <div class="table-scroll">
         <table>
-          <thead><tr><th scope="col">Item</th><th scope="col">Listed variants</th></tr></thead>
+          <thead><tr><th scope="col">Item</th><th scope="col">Variant and stock on hand</th></tr></thead>
           <tbody>
             {% for item in items %}
               <tr>
                 <td>{{ item.name }}</td>
-                <td>{{ item.variants|map(attribute='label')|join(', ') }}</td>
+                <td>{% for variant in item.variants %}{{ variant.label }} ({{ stock.get(variant.source[0], 0) }}){% if not loop.last %}, {% endif %}{% endfor %}</td>
               </tr>
             {% endfor %}
           </tbody>
@@ -41,6 +74,37 @@
   {% else %}
     <p class="empty">No matching catalog items.</p>
   {% endfor %}
+  <details class="catalog-group">
+    <summary>Current assignments ({{ quartermaster_issued|length }})</summary>
+    {% if quartermaster_issued %}
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th scope="col">Item</th><th scope="col">Assigned to</th><th scope="col">Quantity</th><th scope="col">Date</th>{% if editing %}<th scope="col">Action</th>{% endif %}</tr></thead>
+          <tbody>
+            {% for entry in quartermaster_issued %}
+              <tr>
+                <td>{{ entry.device_name }}</td><td>{{ entry.recipient }}</td>
+                <td>{{ entry.quantity }}</td><td>{{ entry.issue_date }}</td>
+                {% if editing %}
+                  <td>
+                    <form method="post" action="{{ url_for('change_quartermaster_stock') }}">
+                      <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                      <input type="hidden" name="assignment_id" value="{{ entry.assignment_id }}">
+                      <input type="hidden" name="q" value="{{ catalog_query }}">
+                      <input type="hidden" name="category" value="{{ catalog_category }}">
+                      <button name="action" value="return">Return all {{ entry.quantity }}</button>
+                    </form>
+                  </td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p>No current assignments.</p>
+    {% endif %}
+  </details>
   <details class="catalog-group">
     <summary>Workbook notes and unidentified entries</summary>
     <ul>

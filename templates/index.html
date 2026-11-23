@@ -154,7 +154,9 @@
               <dd>{{ m.sex or "" }}</dd>
             </dl>
             {% if can_edit %}
-              <p><a class="button" href="{{ url_for('edit_member', employee_id=m.employee_id) }}">Edit</a></p>
+              <button type="button" class="member-edit" data-url="{{ url_for('edit_member', employee_id=m.employee_id) }}">Edit</button>
+              <div class="member-editor" hidden></div>
+              <p class="member-edit-error" role="alert" hidden></p>
             {% endif %}
             <h3>Issued equipment</h3>
             {% if equipment_history is none %}
@@ -234,12 +236,74 @@
   document.querySelectorAll('tr.member-row').forEach((row) => {
     const button = row.querySelector('.disclosure');
     const details = document.getElementById(button.getAttribute('aria-controls'));
+    if (location.hash.slice(1) === encodeURIComponent(details.id)) {
+      details.hidden = false;
+      button.setAttribute('aria-expanded', 'true');
+    }
     row.addEventListener('click', () => {
       details.hidden = !details.hidden;
       button.setAttribute('aria-expanded', String(!details.hidden));
     });
   });
 
+  document.querySelectorAll('.member-edit').forEach((button) => {
+    const details = button.closest('.member-details');
+    const editor = details.querySelector('.member-editor');
+    const error = details.querySelector('.member-edit-error');
+    const showError = (message) => {
+      error.textContent = message;
+      error.hidden = false;
+    };
+
+    button.addEventListener('click', async () => {
+      button.disabled = true;
+      error.hidden = true;
+      try {
+        const response = await fetch(button.dataset.url);
+        if (!response.ok || response.redirected) throw new Error();
+        editor.innerHTML = await response.text();
+        editor.hidden = false;
+        button.hidden = true;
+        editor.querySelector('input:not([type=hidden])')?.focus();
+      } catch {
+        showError('The edit form could not be opened. Refresh and try again.');
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    editor.addEventListener('click', (event) => {
+      if (!event.target.closest('[data-cancel-edit]')) return;
+      editor.replaceChildren();
+      editor.hidden = true;
+      error.hidden = true;
+      button.hidden = false;
+      button.focus();
+    });
+
+    editor.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = event.target;
+      const submit = form.querySelector('[type=submit]');
+      submit.disabled = true;
+      error.hidden = true;
+      try {
+        const response = await fetch(form.action, {method: 'POST', body: new FormData(form)});
+        if (response.status === 204) {
+          history.replaceState(null, '', '#' + encodeURIComponent(details.id));
+          location.reload();
+        } else if (response.status === 400 || response.status === 409) {
+          editor.innerHTML = await response.text();
+        } else {
+          throw new Error();
+        }
+      } catch {
+        showError('Changes could not be saved. Try again.');
+      } finally {
+        submit.disabled = false;
+      }
+    });
+  });
 </script>
 
 {% endblock %}

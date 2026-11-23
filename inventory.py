@@ -111,3 +111,90 @@ def return_device(db, area, device_id, assignment_id):
     """, device_id, assignment_id, area)
     if cursor.rowcount != 1:
         raise ValueError("This assignment is already closed or could not be found.")
+
+
+def catalog_variant_name(item, variant):
+    label = variant["label"]
+    return item["name"] if label == "Unspecified" else f"{item['name']} · {label}"
+
+
+CATALOG_VARIANTS = {
+    variant["source"][0]: catalog_variant_name(item, variant)
+    for item in QUARTERMASTER_CATALOG["items"]
+    for variant in item["variants"]
+}
+
+
+def quartermaster_stock(db):
+    return dict(db.cursor().execute(
+        "SELECT variant_id, quantity FROM dbo.quartermaster_stock"
+    ).fetchall())
+
+
+def quartermaster_history(db, active_only=False):
+    cursor = db.cursor()
+    active_filter = "WHERE a.returned_at IS NULL" if active_only else ""
+    rows = cursor.execute(f"""
+        SELECT a.assignment_id, a.employee_id, m.name AS recipient, a.item_name AS device_name,
+               a.division, a.issued_by, a.quantity, a.issued_at, a.returned_at
+        FROM dbo.quartermaster_assignments a
+        JOIN dbo.agency_members m ON a.employee_id = m.employee_id
+        {active_filter}
+        ORDER BY a.issued_at DESC, a.assignment_id DESC
+    """).fetchall()
+    columns = [column[0] for column in cursor.description]
+    return [
+        dict(zip(columns, row), inventory_label="Quartermaster",
+             issue_date=inventory_date(row.issued_at), return_date=inventory_date(row.returned_at),
+             serial_number="—")
+        for row in rows
+    ]
+
+
+def add_quartermaster_stock(db, variant_id, quantity):
+    cursor = db.cursor()
+    cursor.execute("""
+        UPDATE dbo.quartermaster_stock WITH (UPDLOCK, HOLDLOCK)
+        SET quantity = quantity + ? WHERE variant_id = ?
+    """, quantity, variant_id)
+    if cursor.rowcount == 0:
+        cursor.execute("""
+            INSERT INTO dbo.quartermaster_stock (variant_id, quantity) VALUES (?, ?)
+        """, variant_id, quantity)
+
+
+def assign_quartermaster_stock(db, variant_id, quantity, employee_id, issued_by):
+    cursor = db.cursor()
+    member = cursor.execute("""
+        SELECT division FROM dbo.agency_members
+        WHERE employee_id = ? AND NULLIF(LTRIM(RTRIM(name)), '') IS NOT NULL
+          AND COALESCE(status, '') <> 'Inactive'
+    """, employee_id).fetchone()
+    if member is None:
+        raise ValueError("Select an active person from the roster.")
+
+    cursor.execute("""
+        UPDATE dbo.quartermaster_stock SET quantity = quantity - ?
+        WHERE variant_id = ? AND quantity >= ?
+    """, quantity, variant_id, quantity)
+    if cursor.rowcount != 1:
+        raise ValueError("There is insufficient stock for that item and size.")
+
+    cursor.execute("""
+        INSERT INTO dbo.quartermaster_assignments
+            (variant_id, item_name, employee_id, division, issued_by, quantity)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, variant_id, CATALOG_VARIANTS[variant_id], employee_id, member.division, issued_by, quantity)
+
+
+def return_quartermaster_stock(db, assignment_id):
+    cursor = db.cursor()
+    returned = cursor.execute("""
+        UPDATE dbo.quartermaster_assignments SET returned_at = SYSUTCDATETIME()
+        OUTPUT inserted.variant_id, inserted.quantity
+        WHERE assignment_id = ? AND returned_at IS NULL
+    """, assignment_id).fetchall()
+    if not returned:
+        raise ValueError("This assignment is already closed or could not be found.")
+    row = returned[0]
+    add_quartermaster_stock(db, row.variant_id, row.quantity)
