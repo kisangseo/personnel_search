@@ -2,6 +2,37 @@
 {% from "equipment_history.html" import equipment_history %}
 {% block title %}Inventory | Personnel Admin Portal{% endblock %}
 {% block content %}
+  {% macro assignment_fields(roster, issuers, recipient_label, current_employee_id=none) %}
+    <label>{{ recipient_label }}
+      <select name="recipient_id" required>
+        <option value="">Select a staff member</option>
+        {% for member in roster if member.employee_id != current_employee_id %}
+          <option value="{{ member.employee_id }}">{{ member.name }} ({{ member.employee_id }})</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Issued by
+      <select name="issuer_id" required>
+        <option value="">Select an issuer</option>
+        {% for employee_id, name in issuers.items() %}
+          <option value="{{ employee_id }}">{{ name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  {% endmacro %}
+  {% macro workbook_details(imported) %}
+    {% if imported and imported.fields %}
+      <details>
+        <summary>Workbook details</summary>
+        <dl class="workbook-detail">
+          {% for field, values in imported.fields.items() %}
+            <dt>{{ field }}</dt>
+            <dd>{% for value in values %}<div>{{ value }}</div>{% endfor %}</dd>
+          {% endfor %}
+        </dl>
+      </details>
+    {% endif %}
+  {% endmacro %}
   <h1>Inventory</h1>
   <nav class="inventory-tabs" aria-label="Inventory areas">
     {% for key, label in areas.items() %}
@@ -24,7 +55,6 @@
     </dl>
 
     {% if can_edit %}
-    <div class="inventory-actions">
     <section class="panel">
       <h2>Add device</h2>
       <form class="form-row" method="post" action="{{ url_for('change_inventory', action='add', area=area) }}">
@@ -35,39 +65,6 @@
       </form>
     </section>
 
-    <section class="panel">
-      <h2>Issue device</h2>
-      {% if available_devices and roster %}
-        <form class="form-row" method="post" action="{{ url_for('change_inventory', action='issue', area=area) }}">
-          <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-          <label>Device
-            <select name="device_id" required>
-              <option value="">Select a device</option>
-              {% for device in available_devices %}
-                <option value="{{ device.device_id }}">{{ device.device_name }} ({{ device.serial_number }})</option>
-              {% endfor %}
-            </select>
-          </label>
-          {% for field, label in [('recipient_id', 'Issue to'), ('issuer_id', 'Issued by')] %}
-            <label>{{ label }}
-              <select name="{{ field }}" required>
-                <option value="">Select a staff member</option>
-                {% for member in roster %}
-                  <option value="{{ member.employee_id }}">{{ member.name }}{% if member.division %} · {{ member.division|replace('_', ' ') }}{% endif %} ({{ member.employee_id }})</option>
-                {% endfor %}
-              </select>
-            </label>
-          {% endfor %}
-          <button class="primary" type="submit">Issue device</button>
-        </form>
-      {% elif not available_devices %}
-        <p>No devices in stock.</p>
-      {% else %}
-        <p>No eligible staff members in the personnel roster.</p>
-      {% endif %}
-    </section>
-
-    </div>
     {% endif %}
 
     <section class="panel table-panel">
@@ -86,7 +83,52 @@
             </tr>
           </thead>
           <tbody>
-            {% for device in devices %}
+            {% for group in stock_groups %}
+              {% set form_id = 'issue-stock-' ~ group[0].device_id %}
+              <tr>
+                <td>{{ group[0].device_name }}</td>
+                <td>
+                  <select aria-label="Serial number for {{ group[0].device_name }}"{% if can_edit and roster and issuers %} name="device_id" form="{{ form_id }}" required{% endif %}>
+                    <option value="">Select a serial number</option>
+                    {% for unit in group %}
+                      <option value="{{ unit.device_id }}">{{ unit.serial_number }}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+                <td><span class="stock-status">In stock · {{ group|length }}</span></td>
+                <td>—</td>
+                <td colspan="2">
+                  {% if group|selectattr('device_id', 'in', history)|list or group|selectattr('device_id', 'in', imported_details)|list %}
+                    <details>
+                      <summary>Serial details and history</summary>
+                      {% for unit in group %}
+                        {% set unit_history = history.get(unit.device_id) %}
+                        {% set unit_details = imported_details.get(unit.device_id) %}
+                        {% if unit_history or unit_details %}
+                          <details>
+                            <summary>{{ unit.serial_number }}</summary>
+                            {{ workbook_details(unit_details) }}
+                            {% if unit_history %}{{ equipment_history(unit_history, show_recipient=true) }}{% endif %}
+                          </details>
+                        {% endif %}
+                      {% endfor %}
+                    </details>
+                  {% else %}—{% endif %}
+                </td>
+                {% if can_edit %}
+                  <td>
+                    {% if roster and issuers %}
+                      <form id="{{ form_id }}" class="form-row" method="post" action="{{ url_for('change_inventory', action='issue', area=area) }}">
+                        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                        {{ assignment_fields(roster, issuers, 'Issue to') }}
+                        <button class="primary" type="submit">Issue device</button>
+                      </form>
+                    {% else %}No eligible staff or issuers{% endif %}
+                  </td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+            {% for device in other_devices %}
               {% set entries = history.get(device.device_id, []) %}
               {% set current = active_assignments.get(device.device_id) %}
               {% set imported = imported_details.get(device.device_id) %}
@@ -95,17 +137,7 @@
               <tr>
                 <td>
                   {{ device.device_name }}
-                  {% if imported and imported.fields %}
-                    <details>
-                      <summary>Workbook details</summary>
-                      <dl class="workbook-detail">
-                        {% for field, values in imported.fields.items() %}
-                          <dt>{{ field }}</dt>
-                          <dd>{% for value in values %}<div>{{ value }}</div>{% endfor %}</dd>
-                        {% endfor %}
-                      </dl>
-                    </details>
-                  {% endif %}
+                  {{ workbook_details(imported) }}
                 </td>
                 <td>{{ device.serial_number }}</td>
                 <td>
@@ -134,25 +166,14 @@
                       <button type="submit" aria-label="Return {{ device.device_name }} ({{ device.serial_number }})">Return</button>
                     </form>
                   {% endif %}
-                  {% if (current or workbook_assignees) and roster %}
+                  {% if (current or workbook_assignees) and roster and issuers %}
                     <details>
                       <summary>Change assignment</summary>
                       <form class="form-row" method="post" action="{{ url_for('change_inventory', action='reassign', area=area) }}">
                         <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
                         <input type="hidden" name="device_id" value="{{ device.device_id }}">
                         {% if current %}<input type="hidden" name="assignment_id" value="{{ current.assignment_id }}">{% endif %}
-                        {% for field, label in [('recipient_id', 'New assignee'), ('issuer_id', 'Issued by')] %}
-                          <label>{{ label }}
-                            <select name="{{ field }}" required>
-                              <option value="">Select a staff member</option>
-                              {% for member in roster %}
-                                {% if field != 'recipient_id' or not current or member.employee_id != current.employee_id %}
-                                  <option value="{{ member.employee_id }}">{{ member.name }} ({{ member.employee_id }})</option>
-                                {% endif %}
-                              {% endfor %}
-                            </select>
-                          </label>
-                        {% endfor %}
+                        {{ assignment_fields(roster, issuers, 'New assignee', current.employee_id if current else none) }}
                         <button class="primary" type="submit">Save assignment</button>
                       </form>
                     </details>
@@ -160,9 +181,10 @@
                 </td>
                 {% endif %}
               </tr>
-            {% else %}
-              <tr><td class="empty" colspan="{{ 7 if can_edit else 6 }}">No devices added yet.</td></tr>
             {% endfor %}
+            {% if not devices %}
+              <tr><td class="empty" colspan="{{ 7 if can_edit else 6 }}">No devices added yet.</td></tr>
+            {% endif %}
           </tbody>
         </table>
       </div>

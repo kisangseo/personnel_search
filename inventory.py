@@ -76,6 +76,41 @@ def add_device(db, area, name, serial):
     """, area, name, serial)
 
 
+ISSUER_NAMES = ("Kisang Kevin Seo", "Brandyn Bard", "Sewell Mykell")
+
+
+def inventory_issuers(roster):
+    # A unique name match also supports the roster's "Last, First Middle" format.
+    by_name = {}
+    for member in roster:
+        name = member.name.casefold()
+        if "," in name:
+            last, first = name.split(",", 1)
+            name = f"{first} {last}"
+        by_name.setdefault(" ".join(name.split()), []).append(member)
+    issuers = {}
+    for label in ISSUER_NAMES:
+        names = label.casefold().split()
+        matches = by_name.get(" ".join(names), [])
+        if not matches:
+            matches = [
+                member for name, members in by_name.items()
+                if len(name.split()) >= 2 and (name.split()[0], name.split()[-1]) == (names[0], names[-1])
+                for member in members
+            ]
+        if len(matches) == 1:
+            issuers[matches[0].employee_id] = label
+    return issuers
+
+
+def group_stock(devices):
+    groups = {}
+    for device in devices:
+        key = " ".join(device.device_name.casefold().split())
+        groups.setdefault(key, []).append(device)
+    return list(groups.values())
+
+
 def issue_device(db, area, device_id, recipient_id, issuer_id):
     cursor = db.cursor()
     recipient = cursor.execute("""
@@ -83,13 +118,14 @@ def issue_device(db, area, device_id, recipient_id, issuer_id):
         WHERE employee_id = ? AND NULLIF(LTRIM(RTRIM(name)), '') IS NOT NULL
           AND COALESCE(status, '') <> 'Inactive'
     """, recipient_id).fetchone()
-    issuer = cursor.execute("""
-        SELECT name FROM dbo.agency_members
-        WHERE employee_id = ? AND NULLIF(LTRIM(RTRIM(name)), '') IS NOT NULL
+    issuers = inventory_issuers(cursor.execute("""
+        SELECT employee_id, name FROM dbo.agency_members
+        WHERE NULLIF(LTRIM(RTRIM(name)), '') IS NOT NULL
           AND COALESCE(status, '') <> 'Inactive'
-    """, issuer_id).fetchone()
+    """).fetchall())
+    issuer = issuers.get(issuer_id)
     if recipient is None or issuer is None:
-        raise ValueError("Select a valid recipient and issuer from the personnel roster.")
+        raise ValueError("Select an eligible recipient and one of the authorized issuers.")
 
     cursor.execute("""
         INSERT INTO dbo.inventory_assignments (device_id, employee_id, division, issued_by)
@@ -99,7 +135,7 @@ def issue_device(db, area, device_id, recipient_id, issuer_id):
           AND NOT EXISTS (
             SELECT 1 FROM dbo.technology_import_details t WHERE t.device_id = d.device_id AND t.inactive = 1
           )
-    """, recipient_id, recipient.division, issuer.name, device_id, area)
+    """, recipient_id, recipient.division, issuer, device_id, area)
     if cursor.rowcount != 1:
         raise ValueError("This device is inactive or could not be found.")
     if area == "technology-center":

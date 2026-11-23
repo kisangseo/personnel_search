@@ -761,12 +761,15 @@ def inventory_page():
         and device.device_id not in workbook_issued
         and not imported_details.get(device.device_id, {}).get("inactive")
     ]
-    stock_count = len(available_devices)
+    stock_ids = {device.device_id for device in available_devices}
+    stock_groups = inventory.group_stock(available_devices)
+    other_devices = [device for device in devices if device.device_id not in stock_ids]
     messages = {"added": "Device added.", "issued": "Device issued.", "returned": "Device returned.", "reassigned": "Assignment changed."}
     return render_template(
         "inventory.html", area=area, areas=inventory.AREAS, devices=devices, roster=roster, history=history,
-        active_assignments=active_assignments, available_devices=available_devices,
-        issued_count=len(active_assignments.keys() | workbook_issued), stock_count=stock_count, imported_details=imported_details,
+        active_assignments=active_assignments, stock_groups=stock_groups, other_devices=other_devices,
+        issuers=inventory.inventory_issuers(roster),
+        issued_count=len(active_assignments.keys() | workbook_issued), stock_count=len(available_devices), imported_details=imported_details,
         message=messages.get(request.args.get("result")),
         catalog=catalog, catalog_items=catalog_items, catalog_categories=catalog_categories,
         catalog_query=catalog_query, catalog_category=catalog_category,
