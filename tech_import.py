@@ -77,7 +77,7 @@ def import_devices(db, grouped):
         matched = roster.get(" ".join(assignees[0].casefold().split()), []) if len(assignees) == 1 else []
         inactive = "inactive" in statuses
         member = matched[0] if len(matched) == 1 and not inactive else None
-        review = not inactive and not member and bool(assignees or "active" in statuses)
+        review = not inactive and not member and bool(assignees)
         device = cursor.execute("""
             INSERT INTO dbo.inventory_devices (inventory_area, device_name, serial_number)
             OUTPUT inserted.device_id
@@ -128,9 +128,14 @@ def display_details(rows):
 
 
 def workbook_details(db):
-    return {
-        row.device_id: dict(inactive=row.inactive, needs_review=row.needs_review, fields=display_details(json.loads(row.source_json)))
-        for row in db.cursor().execute("""
-            SELECT device_id, inactive, needs_review, source_json FROM dbo.technology_import_details
-        """).fetchall()
-    }
+    details = {}
+    for row in db.cursor().execute("""
+        SELECT device_id, inactive, needs_review, source_json FROM dbo.technology_import_details
+    """).fetchall():
+        source_rows = json.loads(row.source_json)
+        details[row.device_id] = {
+            "inactive": row.inactive,
+            "workbook_assignees": distinct_values(source_rows, "Assigned User") if row.needs_review else [],
+            "fields": display_details(source_rows),
+        }
+    return details
