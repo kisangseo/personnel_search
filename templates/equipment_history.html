@@ -1,6 +1,7 @@
 {% macro equipment_history(entries, show_recipient=false, show_area=false) %}
   {% if entries %}
-    <table class="equipment-history" border="1" cellpadding="6" cellspacing="0">
+    <div class="table-scroll">
+    <table class="equipment-history">
       <thead>
         <tr>
           {% if show_recipient %}<th scope="col">Recipient</th>{% endif %}
@@ -28,6 +29,7 @@
         {% endfor %}
       </tbody>
     </table>
+    </div>
   {% else %}
     <p>No equipment has been issued.</p>
   {% endif %}
