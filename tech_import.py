@@ -103,9 +103,33 @@ def import_devices(db, grouped):
     return counts
 
 
+def display_details(rows):
+    fields = ("Assigned User", "Department", "Status", "Warranty Expiration Date", "Issued Date", "Notes")
+    details = {}
+    for field in fields:
+        unique = {}
+        keys = ("Notes", "Extra Notes") if field == "Notes" else (field,)
+        for row in rows:
+            for key in keys:
+                raw = row.get(key)
+                if raw is None:
+                    continue
+                value = str(raw).strip()
+                if field.endswith("Date"):
+                    try:
+                        value = datetime.fromisoformat(value).date().isoformat()
+                    except ValueError:
+                        pass
+                if value:
+                    unique.setdefault(" ".join(value.casefold().split()), value)
+        if unique:
+            details[field] = list(unique.values())
+    return details
+
+
 def workbook_details(db):
     return {
-        row.device_id: dict(inactive=row.inactive, needs_review=row.needs_review, rows=json.loads(row.source_json))
+        row.device_id: dict(inactive=row.inactive, needs_review=row.needs_review, fields=display_details(json.loads(row.source_json)))
         for row in db.cursor().execute("""
             SELECT device_id, inactive, needs_review, source_json FROM dbo.technology_import_details
         """).fetchall()

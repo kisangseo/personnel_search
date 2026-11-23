@@ -117,7 +117,7 @@
     <summary>Workbook notes and unidentified entries</summary>
     <ul>
       {% for note in catalog.notes %}
-        <li>{{ note.text }} <small>({{ note.source|join(', ') }})</small></li>
+        <li>{{ note.text }}</li>
       {% endfor %}
     </ul>
   </details>

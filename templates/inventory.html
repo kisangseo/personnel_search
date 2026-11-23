@@ -106,20 +106,15 @@
               <tr>
                 <td>
                   {{ device.device_name }}
-                  {% if imported %}
+                  {% if imported and imported.fields %}
                     <details>
                       <summary>Workbook details</summary>
-                      {% for row in imported.rows %}
-                        <dl class="workbook-detail">
-                          <dt>Source</dt><dd>{{ row.sheet }}, row {{ row.row }}</dd>
-                          {% for field in ['Assigned User', 'Department', 'Status', 'Warranty Expiration Date', 'Issued Date', 'Notes', 'Extra Notes'] %}
-                            {% set value = row[field] %}
-                            {% if value is not none and value != '' %}
-                              <dt>{{ field }}</dt><dd>{{ value[:10] if field.endswith('Date') and value is string else value }}</dd>
-                            {% endif %}
-                          {% endfor %}
-                        </dl>
-                      {% endfor %}
+                      <dl class="workbook-detail">
+                        {% for field, values in imported.fields.items() %}
+                          <dt>{{ field }}</dt>
+                          <dd>{% for value in values %}<div>{{ value }}</div>{% endfor %}</dd>
+                        {% endfor %}
+                      </dl>
                     </details>
                   {% endif %}
                 </td>
