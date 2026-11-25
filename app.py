@@ -717,7 +717,7 @@ def inventory_page():
         with closing(get_db()) as db:
             initialize_inventory(db)
             devices = db.cursor().execute("""
-                SELECT device_id, device_name, serial_number, warranty_expiration, device_status, notes
+                SELECT device_id, device_name, serial_number, warranty_expiration, device_status, notes, device_location
                 FROM dbo.inventory_devices WHERE inventory_area = ?
                 ORDER BY device_name, serial_number
             """, area).fetchall()
@@ -756,19 +756,32 @@ def inventory_page():
     }
     workbook_issued = {device_id for device_id, details in imported_details.items()
                        if details["workbook_assignees"] and not details["inactive"]}
+    locations = {
+        device.device_id: inventory.technology_location(device, imported_details.get(device.device_id))
+        for device in devices if area == "technology-center"
+    }
+    offsite_desktops = {
+        device.device_id for device in devices
+        if area == "technology-center"
+        and " ".join(device.device_name.casefold().split()) == "dell desktop"
+        and locations[device.device_id].casefold() != inventory.TECH_CENTER_LOCATION.casefold()
+    }
     available_devices = [
         device for device in devices if device.device_id not in active_assignments
         and device.device_status != "Inactive"
         and device.device_id not in workbook_issued
+        and device.device_id not in offsite_desktops
         and not imported_details.get(device.device_id, {}).get("inactive")
     ]
     stock_ids = {device.device_id for device in available_devices}
     stock_groups = inventory.group_stock(available_devices)
     other_devices = [device for device in devices if device.device_id not in stock_ids]
     messages = {"added": "Device added.", "issued": "Device issued.", "returned": "Device returned.", "reassigned": "Assignment changed."}
+    messages["details-saved"] = "Device details saved."
     return render_template(
         "inventory.html", area=area, areas=inventory.AREAS, devices=devices, roster=roster, history=history,
         active_assignments=active_assignments, stock_groups=stock_groups, other_devices=other_devices,
+        locations=locations, offsite_desktops=offsite_desktops,
         issuers=inventory.inventory_issuers(roster), device_statuses=inventory.DEVICE_STATUSES,
         issued_count=len(active_assignments.keys() | workbook_issued), stock_count=len(available_devices), imported_details=imported_details,
         message=messages.get(request.args.get("result")),
@@ -832,7 +845,7 @@ def change_quartermaster_stock():
 @app.post("/inventory/<action>")
 def change_inventory(action):
     area = selected_inventory_area()
-    if action not in {"add", "issue", "return", "reassign"}:
+    if action not in {"add", "issue", "return", "reassign", "details"}:
         abort(404)
     if request.headers.get("Sec-Fetch-Site") == "cross-site":
         abort(403)
@@ -859,7 +872,19 @@ def change_inventory(action):
                 device_id = request.form.get("device_id", type=int)
                 if not device_id or not 0 < device_id <= 2147483647:
                     raise ValueError("Select a valid device.")
-                if action in {"issue", "reassign"}:
+                if action == "details":
+                    if area != "technology-center":
+                        abort(404)
+                    location = request.form.get("device_location", "").strip()
+                    if len(location.encode("utf-16-le")) > 200:
+                        raise ValueError("Enter a location of at most 100 characters.")
+                    assignment_id = request.form.get("assignment_id", type=int)
+                    if request.form.get("assignment_id") and (not assignment_id or not 0 < assignment_id <= 2147483647):
+                        raise ValueError("Select a valid assignment.")
+                    inventory.update_technology_device(
+                        db, device_id, location, request.form.get("assignee") == "unassigned", assignment_id
+                    )
+                elif action in {"issue", "reassign"}:
                     recipient_id = request.form.get("recipient_id", "").strip()
                     issuer_id = request.form.get("issuer_id", "").strip()
                     if not recipient_id or not issuer_id or max(len(recipient_id), len(issuer_id)) > 50:
@@ -884,13 +909,14 @@ def change_inventory(action):
             "issue": "This device is already issued or the personnel record is unavailable.",
             "return": "The return could not be recorded.",
             "reassign": "The assignment changed or the personnel record is unavailable.",
+            "details": "The device details could not be saved.",
         }[action]
         return render_template("inventory.html", area=area, areas=inventory.AREAS, error=message), 409
     except pyodbc.Error:
         app.logger.exception("Could not update inventory")
         return render_template("inventory.html", area=area, areas=inventory.AREAS, error="The inventory update could not be completed."), 503
 
-    result = {"add": "added", "issue": "issued", "return": "returned", "reassign": "reassigned"}[action]
+    result = {"add": "added", "issue": "issued", "return": "returned", "reassign": "reassigned", "details": "details-saved"}[action]
     return redirect(url_for("inventory_page", area=area, result=result), code=303)
 
 
