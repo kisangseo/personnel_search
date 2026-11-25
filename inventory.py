@@ -76,7 +76,7 @@ def add_device(db, area, name, serial):
     """, area, name, serial)
 
 
-ISSUER_NAMES = ("Kisang Kevin Seo", "Brandyn Bard", "Sewell Mykell")
+ISSUER_NAMES = ("Kisang Kevin Seo", "Brandyn Bard", "Mykell Sewell")
 
 
 def inventory_issuers(roster):
