@@ -20,6 +20,17 @@
       </select>
     </label>
   {% endmacro %}
+  {% macro device_details(device) %}
+    <dl class="workbook-detail">
+      <dt>Device status</dt><dd>{{ device.device_status }}</dd>
+      {% if device.warranty_expiration %}
+        <dt>Warranty expiration</dt><dd>{{ device.warranty_expiration }}</dd>
+      {% endif %}
+      {% if device.notes %}
+        <dt>Notes</dt><dd style="white-space: pre-wrap">{{ device.notes }}</dd>
+      {% endif %}
+    </dl>
+  {% endmacro %}
   {% macro workbook_details(imported) %}
     {% if imported and imported.fields %}
       <details>
@@ -59,9 +70,16 @@
       <h2>Add device</h2>
       <form class="form-row" method="post" action="{{ url_for('change_inventory', action='add', area=area) }}">
         <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-        <label>Device name <input name="device_name" maxlength="200" required></label>
+        <label>Item name <input name="device_name" maxlength="200" required></label>
         <label>Serial number <input name="serial_number" maxlength="150" required></label>
-        <button class="primary" type="submit">Add to stock</button>
+        <label>Warranty expiration <input type="date" name="warranty_expiration"></label>
+        <label>Status
+          <select name="device_status">
+            {% for status in device_statuses %}<option>{{ status }}</option>{% endfor %}
+          </select>
+        </label>
+        <label>Notes <textarea name="notes" rows="2"></textarea></label>
+        <button class="primary" type="submit">Add device</button>
       </form>
     </section>
 
@@ -98,22 +116,19 @@
                 <td><span class="stock-status">In stock · {{ group|length }}</span></td>
                 <td>—</td>
                 <td colspan="2">
-                  {% if group|selectattr('device_id', 'in', history)|list or group|selectattr('device_id', 'in', imported_details)|list %}
-                    <details>
-                      <summary>Serial details and history</summary>
-                      {% for unit in group %}
-                        {% set unit_history = history.get(unit.device_id) %}
-                        {% set unit_details = imported_details.get(unit.device_id) %}
-                        {% if unit_history or unit_details %}
-                          <details>
-                            <summary>{{ unit.serial_number }}</summary>
-                            {{ workbook_details(unit_details) }}
-                            {% if unit_history %}{{ equipment_history(unit_history, show_recipient=true) }}{% endif %}
-                          </details>
-                        {% endif %}
-                      {% endfor %}
-                    </details>
-                  {% else %}—{% endif %}
+                  <details>
+                    <summary>Serial details and history</summary>
+                    {% for unit in group %}
+                      {% set unit_history = history.get(unit.device_id) %}
+                      {% set unit_details = imported_details.get(unit.device_id) %}
+                      <details>
+                        <summary>{{ unit.serial_number }}</summary>
+                        {% if not unit_details %}{{ device_details(unit) }}{% endif %}
+                        {{ workbook_details(unit_details) }}
+                        {% if unit_history %}{{ equipment_history(unit_history, show_recipient=true) }}{% endif %}
+                      </details>
+                    {% endfor %}
+                  </details>
                 </td>
                 {% if can_edit %}
                   <td>
@@ -137,12 +152,16 @@
               <tr>
                 <td>
                   {{ device.device_name }}
-                  {{ workbook_details(imported) }}
+                  {% if imported %}
+                    {{ workbook_details(imported) }}
+                  {% else %}
+                    <details><summary>Device details</summary>{{ device_details(device) }}</details>
+                  {% endif %}
                 </td>
                 <td>{{ device.serial_number }}</td>
                 <td>
                   {% if current %}<span class="stock-status issued">Issued</span>
-                  {% elif imported and imported.inactive %}<span class="stock-status inactive">Inactive</span>
+                  {% elif device.device_status == "Inactive" or (imported and imported.inactive) %}<span class="stock-status inactive">Inactive</span>
                   {% elif workbook_assignees %}<span class="stock-status issued">Issued</span>
                   {% else %}<span class="stock-status">In stock</span>{% endif %}
                 </td>

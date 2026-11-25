@@ -69,11 +69,15 @@ def fetch_history(db, group_by, area=None):
     return history
 
 
-def add_device(db, area, name, serial):
+DEVICE_STATUSES = ("Active", "Inactive")
+
+
+def add_device(db, area, name, serial, warranty_expiration=None, device_status="Active", notes=""):
     db.cursor().execute("""
-        INSERT INTO dbo.inventory_devices (inventory_area, device_name, serial_number)
-        VALUES (?, ?, ?)
-    """, area, name, serial)
+        INSERT INTO dbo.inventory_devices
+            (inventory_area, device_name, serial_number, warranty_expiration, device_status, notes)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, area, name, serial, warranty_expiration, device_status, notes or None)
 
 
 ISSUER_NAMES = ("Kisang Kevin Seo", "Brandyn Bard", "Mykell Sewell")
@@ -131,7 +135,7 @@ def issue_device(db, area, device_id, recipient_id, issuer_id):
         INSERT INTO dbo.inventory_assignments (device_id, employee_id, division, issued_by)
         SELECT d.device_id, ?, ?, ?
         FROM dbo.inventory_devices d
-        WHERE d.device_id = ? AND d.inventory_area = ?
+        WHERE d.device_id = ? AND d.inventory_area = ? AND d.device_status = 'Active'
           AND NOT EXISTS (
             SELECT 1 FROM dbo.technology_import_details t WHERE t.device_id = d.device_id AND t.inactive = 1
           )

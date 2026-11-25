@@ -1,7 +1,7 @@
 import csv
 import hmac
 import secrets
-from datetime import timedelta
+from datetime import date, timedelta
 import io
 import os
 import re
@@ -717,7 +717,7 @@ def inventory_page():
         with closing(get_db()) as db:
             initialize_inventory(db)
             devices = db.cursor().execute("""
-                SELECT device_id, device_name, serial_number
+                SELECT device_id, device_name, serial_number, warranty_expiration, device_status, notes
                 FROM dbo.inventory_devices WHERE inventory_area = ?
                 ORDER BY device_name, serial_number
             """, area).fetchall()
@@ -758,6 +758,7 @@ def inventory_page():
                        if details["workbook_assignees"] and not details["inactive"]}
     available_devices = [
         device for device in devices if device.device_id not in active_assignments
+        and device.device_status != "Inactive"
         and device.device_id not in workbook_issued
         and not imported_details.get(device.device_id, {}).get("inactive")
     ]
@@ -768,7 +769,7 @@ def inventory_page():
     return render_template(
         "inventory.html", area=area, areas=inventory.AREAS, devices=devices, roster=roster, history=history,
         active_assignments=active_assignments, stock_groups=stock_groups, other_devices=other_devices,
-        issuers=inventory.inventory_issuers(roster),
+        issuers=inventory.inventory_issuers(roster), device_statuses=inventory.DEVICE_STATUSES,
         issued_count=len(active_assignments.keys() | workbook_issued), stock_count=len(available_devices), imported_details=imported_details,
         message=messages.get(request.args.get("result")),
         catalog=catalog, catalog_items=catalog_items, catalog_categories=catalog_categories,
@@ -844,7 +845,16 @@ def change_inventory(action):
                 serial = request.form.get("serial_number", "").strip()
                 if not name or not serial or len(name) > 200 or len(serial) > 150:
                     raise ValueError("Enter a device name and a valid serial number.")
-                inventory.add_device(db, area, name, serial)
+                warranty = request.form.get("warranty_expiration", "").strip()
+                try:
+                    warranty_expiration = date.fromisoformat(warranty) if warranty else None
+                except ValueError:
+                    raise ValueError("Enter a valid warranty expiration date.") from None
+                device_status = request.form.get("device_status", "Active")
+                if device_status not in inventory.DEVICE_STATUSES:
+                    raise ValueError("Select a valid device status.")
+                notes = request.form.get("notes", "").strip()
+                inventory.add_device(db, area, name, serial, warranty_expiration, device_status, notes)
             else:
                 device_id = request.form.get("device_id", type=int)
                 if not device_id or not 0 < device_id <= 2147483647:

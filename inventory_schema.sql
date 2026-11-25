@@ -97,3 +97,23 @@ BEGIN
         );
     END;
 END;
+
+IF COL_LENGTH('dbo.inventory_devices', 'device_status') IS NULL
+BEGIN
+    DECLARE @device_details_lock INT;
+    EXEC @device_details_lock = sp_getapplock
+        @Resource = 'personnel_device_details_schema',
+        @LockMode = 'Exclusive', @LockOwner = 'Transaction';
+    IF @device_details_lock < 0
+        THROW 50004, 'Could not initialize device details.', 1;
+
+    IF COL_LENGTH('dbo.inventory_devices', 'device_status') IS NULL
+    BEGIN
+        ALTER TABLE dbo.inventory_devices ADD
+            warranty_expiration DATE NULL,
+            device_status VARCHAR(8) NOT NULL
+                CONSTRAINT DF_inventory_device_status DEFAULT 'Active'
+                CONSTRAINT CK_inventory_device_status CHECK (device_status IN ('Active', 'Inactive')),
+            notes NVARCHAR(MAX) NULL;
+    END;
+END;
