@@ -107,6 +107,39 @@ def inventory_issuers(roster):
     return issuers
 
 
+TECH_CENTER_LOCATION = "Tech Center"
+
+
+def technology_location(device, imported):
+    if device.device_location is not None:
+        return device.device_location
+    return imported["location"] if imported else TECH_CENTER_LOCATION
+
+
+def update_technology_device(db, device_id, location, unassign, assignment_id):
+    cursor = db.cursor()
+    cursor.execute("""
+        UPDATE dbo.inventory_devices SET device_location = ?
+        WHERE device_id = ? AND inventory_area = 'technology-center'
+    """, location, device_id)
+    if cursor.rowcount != 1:
+        raise ValueError("This Technology Center device could not be found.")
+    if not unassign:
+        return
+
+    current = cursor.execute("""
+        SELECT assignment_id FROM dbo.inventory_assignments WITH (UPDLOCK, HOLDLOCK)
+        WHERE device_id = ? AND returned_at IS NULL
+    """, device_id).fetchone()
+    if (current.assignment_id if current else None) != assignment_id:
+        raise ValueError("The assignment changed. Refresh the inventory and try again.")
+    if current:
+        return_device(db, "technology-center", device_id, current.assignment_id)
+    cursor.execute("""
+        UPDATE dbo.technology_import_details SET needs_review = 0 WHERE device_id = ?
+    """, device_id)
+
+
 def group_stock(devices):
     groups = {}
     for device in devices:

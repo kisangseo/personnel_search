@@ -43,6 +43,12 @@ def workbook_details(db):
         source_rows = json.loads(row.source_json)
         details[row.device_id] = {
             "inactive": row.inactive,
+            "location": "Tech Center" if any(
+                source.get("sheet", "").strip().casefold() == "tech center" for source in source_rows
+            ) else ", ".join(dict.fromkeys(
+                source["sheet"] for source in source_rows
+                if source.get("sheet", "").strip().casefold() not in {"", "master sheet"}
+            )),
             "workbook_assignees": distinct_values(source_rows, "Assigned User") if row.needs_review else [],
             "fields": display_details(source_rows),
         }

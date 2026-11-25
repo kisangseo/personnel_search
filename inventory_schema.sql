@@ -117,3 +117,16 @@ BEGIN
             notes NVARCHAR(MAX) NULL;
     END;
 END;
+
+IF COL_LENGTH('dbo.inventory_devices', 'device_location') IS NULL
+BEGIN
+    DECLARE @device_location_lock INT;
+    EXEC @device_location_lock = sp_getapplock
+        @Resource = 'personnel_device_location_schema',
+        @LockMode = 'Exclusive', @LockOwner = 'Transaction';
+    IF @device_location_lock < 0
+        THROW 50005, 'Could not initialize device locations.', 1;
+
+    IF COL_LENGTH('dbo.inventory_devices', 'device_location') IS NULL
+        ALTER TABLE dbo.inventory_devices ADD device_location NVARCHAR(100) NULL;
+END;

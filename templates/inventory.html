@@ -44,6 +44,26 @@
       </details>
     {% endif %}
   {% endmacro %}
+  {% macro location_and_assignee(device, location, current=none, workbook_assignees=()) %}
+    <p>Location: {{ location or 'Unknown' }}<br>
+      Assigned user: {{ (current.recipient or current.employee_id) if current else (workbook_assignees|join(', ') or 'Unassigned') }}
+    </p>
+    {% if can_edit %}
+      <form class="form-row" method="post" action="{{ url_for('change_inventory', action='details', area=area) }}">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+        <input type="hidden" name="device_id" value="{{ device.device_id }}">
+        {% if current %}<input type="hidden" name="assignment_id" value="{{ current.assignment_id }}">{% endif %}
+        <label>Location <input name="device_location" maxlength="100" value="{{ location }}" list="inventory-locations"></label>
+        <label>Assigned user
+          <select name="assignee">
+            {% if current or workbook_assignees %}<option value="keep">Keep current assignment</option>{% endif %}
+            <option value="unassigned">Unassigned</option>
+          </select>
+        </label>
+        <button class="primary" type="submit">Save details</button>
+      </form>
+    {% endif %}
+  {% endmacro %}
   <h1>Inventory</h1>
   <nav class="inventory-tabs" aria-label="Inventory areas">
     {% for key, label in areas.items() %}
@@ -85,6 +105,7 @@
 
     {% endif %}
 
+    {% if area == "technology-center" %}<datalist id="inventory-locations"><option value="Tech Center"></datalist>{% endif %}
     <section class="panel table-panel">
       <div class="section-head"><h2>Devices</h2></div>
       <div class="table-scroll">
@@ -106,7 +127,7 @@
               <tr>
                 <td>{{ group[0].device_name }}</td>
                 <td>
-                  <select aria-label="Serial number for {{ group[0].device_name }}"{% if can_edit and roster and issuers %} name="device_id" form="{{ form_id }}" required{% endif %}>
+                  <select data-stock-serial aria-label="Serial number for {{ group[0].device_name }}"{% if can_edit and roster and issuers %} name="device_id" form="{{ form_id }}" required{% endif %}>
                     <option value="">Select a serial number</option>
                     {% for unit in group %}
                       <option value="{{ unit.device_id }}">{{ unit.serial_number }}</option>
@@ -114,15 +135,16 @@
                   </select>
                 </td>
                 <td><span class="stock-status">In stock · {{ group|length }}</span></td>
-                <td>—</td>
+                <td>Unassigned</td>
                 <td colspan="2">
                   <details>
                     <summary>Serial details and history</summary>
                     {% for unit in group %}
                       {% set unit_history = history.get(unit.device_id) %}
                       {% set unit_details = imported_details.get(unit.device_id) %}
-                      <details>
-                        <summary>{{ unit.serial_number }}</summary>
+                      <details id="stock-details-{{ unit.device_id }}">
+                        <summary>{{ unit.serial_number }}{% if locations.get(unit.device_id) %} · {{ locations[unit.device_id] }}{% endif %}</summary>
+                        {% if area == "technology-center" %}{{ location_and_assignee(unit, locations[unit.device_id]) }}{% endif %}
                         {% if not unit_details %}{{ device_details(unit) }}{% endif %}
                         {{ workbook_details(unit_details) }}
                         {% if unit_history %}{{ equipment_history(unit_history, show_recipient=true) }}{% endif %}
@@ -152,6 +174,12 @@
               <tr>
                 <td>
                   {{ device.device_name }}
+                  {% if area == "technology-center" %}
+                    <details>
+                      <summary>{{ locations[device.device_id] or 'Location unknown' }}</summary>
+                      {{ location_and_assignee(device, locations[device.device_id], current, workbook_assignees) }}
+                    </details>
+                  {% endif %}
                   {% if imported %}
                     {{ workbook_details(imported) }}
                   {% else %}
@@ -163,9 +191,9 @@
                   {% if current %}<span class="stock-status issued">Issued</span>
                   {% elif device.device_status == "Inactive" or (imported and imported.inactive) %}<span class="stock-status inactive">Inactive</span>
                   {% elif workbook_assignees %}<span class="stock-status issued">Issued</span>
-                  {% else %}<span class="stock-status">In stock</span>{% endif %}
+                  {% else %}<span class="stock-status inactive">Outside Tech Center</span>{% endif %}
                 </td>
-                <td>{{ (current.recipient or current.employee_id) if current else (workbook_assignees|join(', ') or '—') }}</td>
+                <td>{{ (current.recipient or current.employee_id) if current else (workbook_assignees|join(', ') or 'Unassigned') }}</td>
                 <td>{{ last_return or '—' }}</td>
                 <td>
                   {% if entries %}
@@ -209,4 +237,14 @@
       </div>
     </section>
   {% endif %}
+  <script>
+    for (const serial of document.querySelectorAll('[data-stock-serial]')) {
+      serial.addEventListener('change', () => {
+        const details = document.getElementById('stock-details-' + serial.value);
+        if (!details) return;
+        details.closest('td').querySelector('details').open = true;
+        details.open = true;
+      });
+    }
+  </script>
 {% endblock %}
